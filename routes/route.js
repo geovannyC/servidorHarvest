@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const consultasDB = require('../db/request')
 
 router.get('/', (req, res, next) =>{
-    
+    consultasDB.insertUsr();
     res.status(200).json({
         message: 'HOLA funciono en get'
     })  
