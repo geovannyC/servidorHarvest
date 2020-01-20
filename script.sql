@@ -1,8 +1,7 @@
-create database BaseHarvest;
-create table userExample(
-    id int,
-    nombre varchar(24),
-    apellido varchar(24),
-    edad int,
-    email text
-);
+CREATE TABLE usuarios(
+   ID SERIAL PRIMARY KEY,
+   Nombre JSON NOT NULL,
+	Apellido JSON NOT NULL,
+	email JSON NOT NULL,
+	pass text
+)

@@ -1,42 +1,39 @@
 const express = require('express');
 const router = express.Router();
-const consultasDB = require('../db/request')
+const usuario = require('../db/request')
 
-router.get('/', (req, res, next) =>{
-    consultasDB.insertUsr();
-    res.status(200).json({
-        message: 'HOLA funciono en get'
-    })
-});
-router.post('/', (req, res, next) =>{
-    res.status(200).json({
-        message: 'HOLA USO POST'
-    })
-});
-router.get('/:productID', (req, res, next) =>{
-    const id = req.params.productID;
-    if (id === 'hola'){
+router.get("recuperar/:productID", (req, res)=>{
+    const my = req.params.productID;
+    usuario.formatoUsuario.findAll({
+        where:{
+            id: my
+        }
+    }).then(libro => {
+        try{
+            console.log("All users:", JSON.stringify(libro));
+            res.status(200)
+            res.json(libro)
+        }catch{
+            console.log('error')
+        }
         
-        res.status(200).json({
-            message: `Hola estoy en la direccion ${id}`
-        })  
-    }else if (id === '2'){
-        
-        res.status(200).json({
-            message: `Hola estoy en la direccion ${id}`
-        })  
-    }
-    else if (id === '3'){
-       
-        res.status(200).json({
-            message: `Hola estoy en la direccion ${id}`
-        })  
-    }
-    else if (id === '4'){
-        
-        res.status(200).json({
-            message: `Hola estoy en la direccion ${id}`
-        })  
-    }
+      });
+})
+router.get('/crearUsr',(req,res)=>{
+    usuario.formatoUsuario.create({ nombre: "Jane", apellido: "Doe", email: "example@example.com", pass: "asda3sd" }).then(jane => {
+        res.status(200)
+        res.json(jane)
+      });
+})
+router.post('/destruir/:destruirID',(req,res)=>{
+    const my = req.params.destruirID;
+    usuario.formatoUsuario.destroy({
+        where: {
+          id: my
+        }
+      }).then(destr => {
+        res.json('EXTERMINADO')
+      });
+      
 })
 module.exports = router;
