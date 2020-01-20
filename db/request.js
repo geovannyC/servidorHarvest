@@ -18,7 +18,6 @@ const datUsr = async() =>{
 const insertUsr = async() =>{
     const text= "INSERT INTO userExample(id,nombre, apellido, edad, email) VALUES ($1,$2,$3,$4,$5)"
     const VALUES=[1,'Juanito','Comela',21,'juanComela@gmail.com']
-
     const res = await pool.query(text, VALUES);
     console.log(res)
     pool.end();
@@ -36,6 +35,7 @@ const updateUsr = async()=>{
     pool.end();
     console.log(res)
 }
+const prueba;
 exports.datUsr = datUsr;
 exports.insertUsr = insertUsr;
 exports.deleteUsr = deleteUsr;

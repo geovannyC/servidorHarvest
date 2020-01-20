@@ -6,7 +6,7 @@ router.get('/', (req, res, next) =>{
     consultasDB.insertUsr();
     res.status(200).json({
         message: 'HOLA funciono en get'
-    })  
+    })
 });
 router.post('/', (req, res, next) =>{
     res.status(200).json({
@@ -15,7 +15,7 @@ router.post('/', (req, res, next) =>{
 });
 router.get('/:productID', (req, res, next) =>{
     const id = req.params.productID;
-    if (id === '1'){
+    if (id === 'hola'){
         
         res.status(200).json({
             message: `Hola estoy en la direccion ${id}`
