@@ -9,8 +9,9 @@ var path = require('path');
 router.get("/",(req, res)=>{
     res.sendFile(path.join(__dirname, '../web/registro.html'))
 })
-router.get("recuperar/:productID", (req, res)=>{
+router.get("/recuperar/:productID", (req, res)=>{
     const my = req.params.productID;
+    console.log('funciono')
     usuario.formatoUsuario.findAll({
         where:{
             id: my
@@ -28,7 +29,7 @@ router.get("recuperar/:productID", (req, res)=>{
 })
 router.get('/crearUsr',(req,res)=>{
   
-    usuario.formatoUsuario.create(datos).then(jane => {
+    usuario.formatoUsuario.create().then(jane => {
         res.status(200)
         res.json(jane)
       });
