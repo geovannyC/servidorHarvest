@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Registro</title>
-        <script src="../routes/empaquetado.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     </head>
 
     <body class=" h-full text-gray-600 flex flex-col"><img class="  w-screen absolute opacity-100 " src="../img/12122706_937715656300448_8991729627175392276_n20.jpg" alt="">
@@ -54,9 +54,20 @@
                         <input class="shadow appearance-none border border-red rounded w-full py-2 px-3 text-grey-darker mb-3" id="Contraseña" name="persona_clave" type="password" placeholder="******">
                     </div>
                     <div class="flex items-center justify-between">
-                        <button class="float-left bg-red-700 hover:bg-red-500 text-white font-bold py-2 px-4 rounded" type="button" onclick="obtenerDatos()">Registrarse</button>
+                        <button class="float-left bg-red-700 hover:bg-red-500 text-white font-bold py-2 px-4 rounded" type="button" onclick="window.location.assign(devolver())">Registrarse</button>
                         <a class="float-right bg-red-700 hover:bg-red-500 text-white font-bold py-2 px-4 rounded" type="button" href="index.html">Volver</a>
                     </div>
+                    <script>
+                    function devolver(){
+                        try{
+                            console.log('uno')
+                            return (`http://localhost:3000/crearUsr/${document.getElementById("Nombre").value}/${document.getElementById("Apellido").value}/${document.getElementById("Telefono").value}/${document.getElementById("Ciudad").value}/${document.getElementById("Correo").value}/${document.getElementById("Contraseña").value}`) 
+                        }catch{
+                            return ('vales VRG')
+                        }
+                        
+                    }
+                    </script>
                 </form>
             </div>
         </div>
