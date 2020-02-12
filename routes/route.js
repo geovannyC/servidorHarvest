@@ -12,16 +12,17 @@ router.get("/principal",(req, res)=>{
     res.sendFile(path.join(__dirname, '../web/home.html'))
     
 })
-router.get("/:urlDIR/:productID", (req, res)=>{
-    
-    const url = tablas[req.params.urlDIR]
-    const my = parseInt(req.params.productID);
-    url.findAll({
-        where: {
-            id: my
+router.get("/contenido/:nombre/:ciudad", (req, res)=>{
+    const nombre = req.params.nombre
+    const ciudad = req.params.ciudad
+    tablas.Contenidos.findAll({
+        where:{
+        nombreproducto: nombre,
+        ciudad: ciudad
+
         }
     }).then(libro => {
-        JSON.stringify(libro)===JSON.stringify([])?res.json('no hay usuario'):res.json(libro)
+        JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
         
       });
 })
@@ -38,7 +39,8 @@ router.get('/crearUsr/:usr1/:usr2/:usr3/:usr4/:usr5/:usr6',(req,res)=>{
         telefono: telefonoUsr,
         ciudad: ciudadUsr,
         correo_elect: correo_electUsr,
-        contraseña: contraseñaUsr
+        contraseña: contraseñaUsr,
+
     }
     console.log('dos')
     usuario.formatoUsuario.create(datos).then(jane => {
