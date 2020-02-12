@@ -41,6 +41,7 @@ nombreProducto VARCHAR (20) NOT NULL,
 empresa VARCHAR (50) NOT NULL UNIQUE,
 descripcion VARCHAR (200) NOT NULL,
 precio VARCHAR (10) NOT NULL,
+ciudad VARCHAR (15) NOT NULL,
 estado BOOLEAN NOT NULL
 );
 
