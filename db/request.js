@@ -63,12 +63,7 @@ sequelize
     timestamps: false
   })
   const Contenidos = sequelize.define("contenidos",{
-    id: {
-      allowNull: false,
-      primaryKey: true,
-      type: Sequelize.TEXT,
-      defaultValue: Sequelize.UUIDV4()
-    },
+  
     idimagen: Sequelize.TEXT,
     nombreproducto: Sequelize.TEXT,
     empresa: Sequelize.TEXT,
