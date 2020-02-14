@@ -3,7 +3,7 @@ const router = express.Router();
 const tablas = require('../db/request')
 
 router.post('/contenido',(req,res)=>{
-  tablas.Contenidos.create({        
+  tablas.Publicaciones.create({  
     idimagen: req.body.idimagen,
     nombreproducto: req.body.nombreproducto,
     empresa: req.body.empresa,
@@ -16,6 +16,17 @@ router.post('/contenido',(req,res)=>{
   res.json(jane)
 })
 
+})
+router.get("/publicacion/:id", (req, res)=>{
+  const id = req.params.id
+  tablas.Publicaciones.findAll({
+      where:{
+      idimagen: id
+      }
+  }).then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
+      
+    });
 })
 router.get("/contenido/:nombre/:ciudad", (req, res)=>{
     const nombre = req.params.nombre

@@ -52,18 +52,18 @@ sequelize
   {
     timestamps: false
   })
-  const Publicaciones = sequelize.define("Publicaciones",{
-    idImagen: Sequelize.TEXT,
-    idCategoria: Sequelize.TEXT,
-    idContenido: Sequelize.TEXT,
-    titulo: Sequelize.TEXT,
+  const Publicaciones = sequelize.define("contenidos",{
+    idimagen: Sequelize.TEXT,
+    nombreproducto: Sequelize.TEXT,
+    empresa: Sequelize.TEXT,
     descripcion: Sequelize.TEXT,
+    precio: Sequelize.TEXT,
+    ciudad: Sequelize.TEXT
   },
   {
     timestamps: false
   })
   const Contenidos = sequelize.define("contenidos",{
-  
     idimagen: Sequelize.TEXT,
     nombreproducto: Sequelize.TEXT,
     empresa: Sequelize.TEXT,
