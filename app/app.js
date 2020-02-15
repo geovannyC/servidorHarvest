@@ -1,9 +1,13 @@
 const express = require('express');
-const app = express();
+const app = express(),
+bodyParser = require('body-parser');
 var cors = require('cors');
 const logger = require('morgan');
 const productsRoutes = require('../routes/route');
-//direccion master
+app.use(express.static('src'));
+
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true

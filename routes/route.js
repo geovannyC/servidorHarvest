@@ -1,4 +1,7 @@
-const express = require('express');
+const express = require('express'),
+path = require('path'),
+  nodeMailer = require('nodemailer'),
+  bodyParser = require('body-parser');
 const router = express.Router();
 const tablas = require('../db/request')
 
@@ -53,4 +56,31 @@ router.post('/destruir/:destruirID',(req,res)=>{
       });
       
 })
+router.post('/send-email', (req, res)=>{
+  let transporter = nodeMailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        // should be replaced with real sender's account
+        user: 'maesongamer@gmail.com',
+        pass: 'm@rcelo272'
+    }
+});
+let mailOptions = {
+    // should be replaced with real recipient's account
+    to: 'marloncasagallo@gmail.com',
+    subject: 'hola',
+    body: 'soy shoo'
+};
+transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        return console.log(error);
+    }
+    console.log('Message %s sent: %s', info.messageId, info.response);
+});
+
+res.end();
+});
+
 module.exports = router;
