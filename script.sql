@@ -36,10 +36,10 @@ descripcion VARCHAR (300) NOT NULL
 
 CREATE TABLE IF NOT EXISTS public.Contenidos(
 id serial NOT NULL,
-idImagen VARCHAR (20) NOT NULL,
-nombreProducto VARCHAR (20) NOT NULL,
+idImagen TEXT,
+nombreProducto VARCHAR (35) NOT NULL,
 empresa VARCHAR (50) NOT NULL,
-descripcion VARCHAR (500) NOT NULL,
+descripcion VARCHAR (1000) NOT NULL,
 precio VARCHAR (10) NOT NULL,
 ciudad VARCHAR (15) NOT NULL,
 estado BOOLEAN 

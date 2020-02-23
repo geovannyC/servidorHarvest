@@ -1,5 +1,5 @@
 const express = require('express'),
-path = require('path'),
+
   nodeMailer = require('nodemailer'),
   bodyParser = require('body-parser');
 const router = express.Router();
@@ -18,7 +18,12 @@ router.post('/contenido',(req,res)=>{
   res.status(200)
   res.json(jane)
 })
-
+})
+router.get("/publicaciones", (req, res)=>{
+  tablas.Contenidos.findAll().then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+      console.log(libro)
+    });
 })
 router.get("/publicacion/:id", (req, res)=>{
   const id = req.params.id
