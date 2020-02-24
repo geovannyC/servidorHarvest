@@ -6,7 +6,8 @@ const router = express.Router();
 const tablas = require('../db/request')
 
 router.post('/contenido',(req,res)=>{
-  tablas.Publicaciones.create({  
+  tablas.Publicaciones.create({
+    idusuario: req.body.idusuario,
     idimagen: req.body.idimagen,
     nombreproducto: req.body.nombreproducto,
     empresa: req.body.empresa,
@@ -20,7 +21,18 @@ router.post('/contenido',(req,res)=>{
 })
 })
 router.get("/publicaciones", (req, res)=>{
-  tablas.Contenidos.findAll().then(libro => {
+  tablas.Publicaciones.findAll().then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+      console.log(libro)
+    });
+})
+router.get("/datausr/:id", (req, res)=>{
+  const id = req.params.id
+  tablas.Publicaciones.findAll({
+    where: {
+      idusuario: id
+    }
+  }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
       console.log(libro)
     });
@@ -36,9 +48,20 @@ router.get("/publicacion/:id", (req, res)=>{
       
     });
 })
+router.get("/login/:correo/:contra", (req, res)=>{ 
+  tablas.personas.findAll({
+      where:{
+      correo: req.params.correo,
+      contra: req.params.contra
+      }
+  }).then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
+    });
+})
+
 router.get("/contenido/:nombre/:ciudad", (req, res)=>{
-    const nombre = req.params.nombre
-    const ciudad = req.params.ciudad
+    const nombre = JSON.stringify(req.params.nombre)
+    const ciudad = JSON.stringify(req.params.ciudad)
     tablas.Contenidos.findAll({
         where:{
         nombreproducto: nombre,
@@ -60,6 +83,25 @@ router.post('/destruir/:destruirID',(req,res)=>{
         res.json('EXTERMINADO')
       });
       
+})
+router.post('/registro',(req,res)=>{
+  try{
+    console.log(req.body)
+      tablas.personas.create({
+        nombre: req.body.nombre,
+        apellido: req.body.apellido,
+        telefono: req.body.telefono,
+        cedula: req.body.cedula,
+        correo: req.body.correo,
+        contra: req.body.contra,
+      }).then(jane => {
+        
+          res.status(200)
+          res.json(jane)
+        })
+  }catch{
+      console.log(error)
+  }
 })
 router.post('/send-email', (req, res)=>{
   let transporter = nodeMailer.createTransport({

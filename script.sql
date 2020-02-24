@@ -1,16 +1,13 @@
 CREATE TABLE IF NOT EXISTS public.Personas(
 id serial NOT NULL primary key,
-primer_nombre VARCHAR (40) NOT NULL,
-segundo_nombre VARCHAR (40) NOT NULL,
-primer_apellido VARCHAR (40) NOT NULL,
-segundo_apellido VARCHAR (40) NOT NULL,
+nombre VARCHAR (40) NOT NULL,
+apellido VARCHAR (40) NOT NULL,
+telefono VARCHAR (40) NOT NULL,
 cedula VARCHAR(10) NOT NULL UNIQUE,
-telefono VARCHAR (10) NOT NULL UNIQUE,
-ciudad VARCHAR (40) NOT NULL,
-correo_elect VARCHAR (50) NOT NULL UNIQUE,
-contraseña VARCHAR (10) NOT NULL UNIQUE
+correo VARCHAR (50) NOT NULL UNIQUE,
+contra VARCHAR (10) NOT NULL
 );
-
+	
 CREATE TABLE IF NOT EXISTS public.RolUsuarios(
 id serial NOT NULL,
 idPersona INT NOT NULL,
@@ -27,7 +24,7 @@ contraseña VARCHAR (10) NOT NULL UNIQUE
 
 CREATE TABLE IF NOT EXISTS public.Publicaciones(
 id serial NOT NULL,
-idImagen INT NOT NULL,
+idImagen TEXT,
 idCategoria INT NOT NULL,
 idContenido INT NOT NULL,
 titulo VARCHAR (20) NOT NULL,
@@ -36,6 +33,7 @@ descripcion VARCHAR (300) NOT NULL
 
 CREATE TABLE IF NOT EXISTS public.Contenidos(
 id serial NOT NULL,
+idUsuario INT,
 idImagen TEXT,
 nombreProducto VARCHAR (35) NOT NULL,
 empresa VARCHAR (50) NOT NULL,

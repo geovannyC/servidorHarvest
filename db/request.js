@@ -16,21 +16,12 @@ sequelize
   });
   
   const personas = sequelize.define("personas",{
-    id: {
-      allowNull: false,
-      primaryKey: true,
-      type: Sequelize.TEXT,
-      defaultValue: Sequelize.UUIDV4()
-    },
-    primer_nombre: Sequelize.TEXT,
-    segundo_nombre: Sequelize.TEXT,
-    primer_apellido: Sequelize.TEXT,
-    segundo_apellido: Sequelize.TEXT,
-    cedula: Sequelize.TEXT,
+    nombre: Sequelize.TEXT,
+    apellido: Sequelize.TEXT,
     telefono: Sequelize.TEXT,
-    ciudad: Sequelize.TEXT,
-    correo_elect: Sequelize.TEXT,
-    contraseña: Sequelize.TEXT,
+    cedula: Sequelize.TEXT,
+    correo: Sequelize.TEXT,
+    contra: Sequelize.TEXT
   },
   {
     timestamps: false
@@ -53,6 +44,7 @@ sequelize
     timestamps: false
   })
   const Publicaciones = sequelize.define("contenidos",{
+    idusuario: Sequelize.TEXT,
     idimagen: Sequelize.TEXT,
     nombreproducto: Sequelize.TEXT,
     empresa: Sequelize.TEXT,
