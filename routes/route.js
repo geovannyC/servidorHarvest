@@ -20,12 +20,56 @@ router.post('/contenido',(req,res)=>{
   res.json(jane)
 })
 })
+router.get("/ventas/:id", (req, res)=>{
+  tablas.Compras.findAll({
+    where: {
+      idvendedor: req.params.id
+    }
+  }).then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+      console.log(libro)
+    });
+})
+router.get("/compras/:id", (req, res)=>{
+  tablas.Compras.findAll({
+    where: {
+      idusuario: req.params.id
+    }
+  }).then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+      console.log(libro)
+    });
+})
 router.get("/publicaciones", (req, res)=>{
   tablas.Publicaciones.findAll().then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
       console.log(libro)
     });
 })
+router.post('/compra',(req,res)=>{
+  tablas.Compras.create(req.body).then(jane => {
+      res.status(200)
+      res.json(jane)
+    })
+})
+router.post('/actualizarPublicacion/:id',(req,res)=>{
+  const id = req.params.id
+  tablas.Publicaciones.update(req.body,{
+      where: {
+          id: id
+      }
+  }).then(jane => {
+      res.status(200)
+      res.json(jane)
+    })
+})
+router.post('/borrarPublicacion/:id',(req,res)=>{
+  tablas.Publicaciones.destroy({
+      where: {
+          id: req.params.id
+      }
+    })
+    });
 router.get("/datausr/:id", (req, res)=>{
   const id = req.params.id
   tablas.Publicaciones.findAll({
@@ -34,6 +78,17 @@ router.get("/datausr/:id", (req, res)=>{
     }
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+      console.log(libro)
+    });
+})
+router.get("/dataPublicacion/:id", (req, res)=>{
+  const id = req.params.id
+  tablas.personas.findAll({
+    where: {
+      id: id
+    }
+  }).then(libro => {
+      res.json(libro);
       console.log(libro)
     });
 })
@@ -62,7 +117,7 @@ router.get("/login/:correo/:contra", (req, res)=>{
 router.get("/contenido/:nombre/:ciudad", (req, res)=>{
     const nombre = JSON.stringify(req.params.nombre)
     const ciudad = JSON.stringify(req.params.ciudad)
-    tablas.Contenidos.findAll({
+    tablas.Publicaciones.findAll({
         where:{
         nombreproducto: nombre,
         ciudad: ciudad

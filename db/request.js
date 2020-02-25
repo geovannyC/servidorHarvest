@@ -86,14 +86,26 @@ sequelize
     timestamps: false
   })
  
-  const Compras = sequelize.define("Compras",{
-    idContenido: Sequelize.TEXT,
-    idPublicacion: Sequelize.TEXT,
-    idPersona: Sequelize.TEXT,
-    fechaCompra: Sequelize.TEXT,
-    fecharEntrega: Sequelize.TEXT,
-    tipoPago: Sequelize.TEXT,
-    estado: Sequelize.TEXT
+  const Compras = sequelize.define("compras",{
+    idpublicacion: Sequelize.TEXT,
+    idvendedor: Sequelize.TEXT,
+    idimagen: Sequelize.TEXT,
+    nombreproducto: Sequelize.TEXT,
+    empresa: Sequelize.TEXT,
+    descripcion: Sequelize.TEXT,
+    precio: Sequelize.TEXT,
+    ciudad: Sequelize.TEXT,
+    fechacompra: Sequelize.TEXT,
+    nombrevendedor: Sequelize.TEXT,
+    apellidovendedor: Sequelize.TEXT,
+    telefonovendedor: Sequelize.TEXT,
+    emailvendedor: Sequelize.TEXT,
+    cedulavendedor: Sequelize.TEXT,
+    idusuario: Sequelize.TEXT,
+    nombrecomprador: Sequelize.TEXT,
+    apellidocomprador: Sequelize.TEXT,
+    correocomprador: Sequelize.TEXT, 
+    telefonocomprador: Sequelize.TEXT,
   },
   {
     timestamps: false

@@ -3,8 +3,8 @@ id serial NOT NULL primary key,
 nombre VARCHAR (40) NOT NULL,
 apellido VARCHAR (40) NOT NULL,
 telefono VARCHAR (40) NOT NULL,
-cedula VARCHAR(10) NOT NULL UNIQUE,
-correo VARCHAR (50) NOT NULL UNIQUE,
+cedula VARCHAR(15) NOT NULL UNIQUE,
+correo VARCHAR (100) NOT NULL UNIQUE,
 contra VARCHAR (10) NOT NULL
 );
 	
@@ -62,14 +62,25 @@ productosVendidos VARCHAR (2) NOT NULL UNIQUE
 
 CREATE TABLE IF NOT EXISTS public.Compras(
 id serial NOT NULL,
-idContenido INT NOT NULL,
-idPublicacion INT NOT NULL,
-idPersona INT NOT NULL,
-fechaCompra DATE NOT NULL,
-fecharEntrega DATE NOT NULL,
-tipoPago VARCHAR (20) NOT NULL,
-estado BOOLEAN NOT NULL,
-	foreign key (idPersona) references Personas(id)
+idPublicacion INT,
+idVendedor int,
+idImagen TEXT,
+nombreProducto VARCHAR (50) NOT NULL,
+empresa VARCHAR (50) NOT NULL,
+descripcion VARCHAR (1000) NOT NULL,
+precio VARCHAR (10) NOT NULL,
+ciudad VARCHAR (15) NOT NULL,
+fechaCompra TEXT,
+nombreVendedor TEXT,
+apellidoVendedor TEXT,
+telefonoVendedor TEXT,
+emailVendedor TEXT,
+cedulaVendedor TEXT,
+idUsuario TEXT,
+nombreComprador TEXT,
+apellidoComprador TEXT,
+correoComprador TEXT,
+telefonoComprador TEXT
 );
 
 CREATE TABLE IF NOT EXISTS public.Categorias(
