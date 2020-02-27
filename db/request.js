@@ -43,6 +43,17 @@ sequelize
   {
     timestamps: false
   })
+  
+  const Platillos = sequelize.define("platillos",{
+    platillo: Sequelize.TEXT,
+    precio: Sequelize.TEXT,
+    comprador: Sequelize.TEXT,
+    correo: Sequelize.TEXT,
+   
+  },
+  {
+    timestamps: false
+  })
   const Publicaciones = sequelize.define("contenidos",{
     idusuario: Sequelize.TEXT,
     idimagen: Sequelize.TEXT,
@@ -155,7 +166,7 @@ sequelize
   })
 
         
- 
+ exports.Platillos = Platillos;
 exports.personas = personas;
 exports.RolUsuario = RolUsuario;
 exports.Login = Login;

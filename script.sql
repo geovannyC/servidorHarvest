@@ -7,7 +7,13 @@ cedula VARCHAR(15) NOT NULL UNIQUE,
 correo VARCHAR (100) NOT NULL UNIQUE,
 contra VARCHAR (10) NOT NULL
 );
-	
+CREATE TABLE IF NOT EXISTS public.platillos(
+id serial NOT NULL,
+platillo VARCHAR(50),
+precio VARCHAR (50),
+comprador VARCHAR (50),
+correo VARCHAR (50)
+);
 CREATE TABLE IF NOT EXISTS public.RolUsuarios(
 id serial NOT NULL,
 idPersona INT NOT NULL,

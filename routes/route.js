@@ -27,7 +27,7 @@ router.get("/ventas/:id", (req, res)=>{
     }
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
-      console.log(libro)
+     
     });
 })
 router.get("/compras/:id", (req, res)=>{
@@ -36,18 +36,24 @@ router.get("/compras/:id", (req, res)=>{
       idusuario: req.params.id
     }
   }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
-      console.log(libro)
+      JSON.stringify(libro)===JSON.stringify([])?res.json('No has realizado ninguna compra'):res.json(libro);
+      
     });
 })
 router.get("/publicaciones", (req, res)=>{
   tablas.Publicaciones.findAll().then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
-      console.log(libro)
+     
     });
 })
 router.post('/compra',(req,res)=>{
   tablas.Compras.create(req.body).then(jane => {
+      res.status(200)
+      res.json(jane)
+    })
+})
+router.post('/platillos',(req,res)=>{
+  tablas.Platillos.create(req.body).then(jane => {
       res.status(200)
       res.json(jane)
     })
@@ -78,7 +84,7 @@ router.get("/datausr/:id", (req, res)=>{
     }
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
-      console.log(libro)
+     
     });
 })
 router.get("/dataPublicacion/:id", (req, res)=>{
@@ -89,7 +95,7 @@ router.get("/dataPublicacion/:id", (req, res)=>{
     }
   }).then(libro => {
       res.json(libro);
-      console.log(libro)
+     
     });
 })
 router.get("/publicacion/:id", (req, res)=>{
@@ -110,7 +116,7 @@ router.get("/login/:correo/:contra", (req, res)=>{
       contra: req.params.contra
       }
   }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
+      JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
     });
 })
 
@@ -149,13 +155,12 @@ router.post('/registro',(req,res)=>{
         cedula: req.body.cedula,
         correo: req.body.correo,
         contra: req.body.contra,
-      }).then(jane => {
+      }).then(libro => {
         
-          res.status(200)
-          res.json(jane)
+        JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
         })
   }catch{
-      console.log(error)
+      res.json('usuario incorrecto')
   }
 })
 router.post('/send-email', (req, res)=>{
