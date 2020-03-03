@@ -58,17 +58,7 @@ router.post('/platillos',(req,res)=>{
       res.json(jane)
     })
 })
-router.post('/actualizarPublicacion/:id',(req,res)=>{
-  const id = req.params.id
-  tablas.Publicaciones.update(req.body,{
-      where: {
-          id: id
-      }
-  }).then(jane => {
-      res.status(200)
-      res.json(jane)
-    })
-})
+
 router.post('/borrarPublicacion/:id',(req,res)=>{
   tablas.Publicaciones.destroy({
       where: {
@@ -76,7 +66,29 @@ router.post('/borrarPublicacion/:id',(req,res)=>{
       }
     })
     });
+router.get("/getPersonas/:id", (req, res)=>{
+  const id = req.params.id
+  tablas.personas.findAll({
+    where: {
+      id: id
+    }
+  }).then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+     
+    });
+})
 router.get("/datausr/:id", (req, res)=>{
+  const id = req.params.id
+  tablas.Publicaciones.findAll({
+    where: {
+      idusuario: id
+    }
+  }).then(libro => {
+      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+     
+    });
+})
+router.get("/publicacionesusuario/:id", (req, res)=>{
   const id = req.params.id
   tablas.Publicaciones.findAll({
     where: {
@@ -121,11 +133,11 @@ router.get("/login/:correo/:contra", (req, res)=>{
 })
 
 router.get("/contenido/:nombre/:ciudad", (req, res)=>{
-    const nombre = JSON.stringify(req.params.nombre)
-    const ciudad = JSON.stringify(req.params.ciudad)
+    const nombre = req.params.nombre
+    const ciudad = req.params.ciudad
     tablas.Publicaciones.findAll({
         where:{
-        nombreproducto: nombre,
+        nombreproducto: nombre, 
         ciudad: ciudad
 
         }
