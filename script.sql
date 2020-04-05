@@ -128,26 +128,7 @@ CREATE TABLE IF NOT EXISTS public.Historial(
 id serial NOT NULL,
 idPersona INT NOT NULL
 );
-insert into personas (primer_nombre,
-segundo_nombre,
-primer_apellido ,
-segundo_apellido,
-cedula,
-telefono,
-ciudad,
-correo_elect,
-contraseña)
-values (
-'Jova',
-	'Pelo',
-	'Peperoni',
-	'Concha',
-	'15348314',
-	'48367123',
-	'Lora',
-	'asdasd',
-	'123'
-)
+
 
 
 
