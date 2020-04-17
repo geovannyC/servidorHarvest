@@ -21,7 +21,8 @@ sequelize
     telefono: Sequelize.TEXT,
     cedula: Sequelize.TEXT,
     correo: Sequelize.TEXT,
-    contra: Sequelize.TEXT
+    contra: Sequelize.TEXT,
+    estado: Sequelize.TEXT,
   },
   {
     timestamps: false
@@ -61,7 +62,9 @@ sequelize
     empresa: Sequelize.TEXT,
     descripcion: Sequelize.TEXT,
     precio: Sequelize.TEXT,
-    ciudad: Sequelize.TEXT
+    ciudad: Sequelize.TEXT,
+    estadousuario: Sequelize.TEXT,
+    estadopublicacion: Sequelize.TEXT,
   },
   {
     timestamps: false
@@ -167,7 +170,7 @@ sequelize
 
         
  exports.Platillos = Platillos;
-exports.personas = personas;
+exports.Personas = personas;
 exports.RolUsuario = RolUsuario;
 exports.Login = Login;
 exports.Publicaciones = Publicaciones;

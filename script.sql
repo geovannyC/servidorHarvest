@@ -5,7 +5,8 @@ apellido VARCHAR (40) NOT NULL,
 telefono VARCHAR (40) NOT NULL,
 cedula VARCHAR(15) NOT NULL UNIQUE,
 correo VARCHAR (100) NOT NULL UNIQUE,
-contra VARCHAR (10) NOT NULL
+contra VARCHAR (25) NOT NULL,
+estado VARCHAR (25) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS public.platillos(
 id serial NOT NULL,
@@ -46,7 +47,8 @@ empresa VARCHAR (50) NOT NULL,
 descripcion VARCHAR (1000) NOT NULL,
 precio VARCHAR (10) NOT NULL,
 ciudad VARCHAR (15) NOT NULL,
-estado BOOLEAN 
+estadoUsuario VARCHAR (25) NOT NULL,
+estadoPublicacion VARCHAR (25) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.Imagenes(
