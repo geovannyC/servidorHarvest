@@ -168,20 +168,29 @@ router.post('/destruir/:destruirID',(req,res)=>{
       
 })
 router.post('/actualizarusuario',(req,res)=>{
-  console.log(req.body.id)
+
   tablas.Personas.update(
     {estado: req.body.estado},
     {where: {id: req.body.id}}
   ).then(()=>{
-    console.log('usuario actualizado')
+
   });
   tablas.Publicaciones.update(
     {estadousuario: req.body.estadousuario},
     {where: {idusuario: req.body.id}}).then(()=>{
-      console.log('Publicaciones Actualizadas')
+
     })
     
 })
+router.post('/actualizarpublicacion',(req,res)=>{
+  console.log(req.body)
+  tablas.Publicaciones.update(
+    {estadopublicacion: req.body.estadopublicacion},
+    {where: {id: req.body.id}}).then(()=>{
+      console.log('Publicacion Actualizada')
+    })
+    
+});
 router.post('/registro',(req,res)=>{
   try{
     
