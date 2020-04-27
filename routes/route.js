@@ -16,9 +16,43 @@ router.post('/contenido',(req,res)=>{
     estadousuario: req.body.estadoUsuario,
     estadopublicacion: req.body.estadoPublicacion
   }
-    ).then(jane => {
+    ).then(usuario => {
+      const id = usuario.idusuario
+      tablas.Personas.findAll({
+        where: {
+          id: id
+        }
+      }).then(libro => {
+        console.log(usuario.nombreproducto, JSON.stringify(libro[0]['correo']))
+          JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
+          let transporter = nodeMailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                // should be replaced with real sender's account
+                user: '',
+                pass: ''
+            }
+        });
+        let mailOptions = {
+            // should be replaced with real recipient's account
+            to: libro[0]['correo'],
+            subject: `Tu Publicacion ${usuario.nombreproducto} ha sido creada con éxito, espera su aprobación`,
+            body: 'Gracias por confiar en nosotros, para verificar que tu publicación cumple con las politicas de la empresa debes esperar 24h hasta su aprobación'
+        };
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return console.log('HUBO UN ERROR');
+            }
+            // console.log('Message %s sent: %s', info.messageId, info.response);
+        });
+        
+        res.end();
+        });
+
   res.status(200)
-  res.json(jane)
+  res.json(usuario)
 })
 })
 router.get("/ventas/:id", (req, res)=>{
@@ -56,12 +90,6 @@ router.get("/usuarios", (req, res)=>{
 })
 router.post('/compra',(req,res)=>{
   tablas.Compras.create(req.body).then(jane => {
-      res.status(200)
-      res.json(jane)
-    })
-})
-router.post('/platillos',(req,res)=>{
-  tablas.Platillos.create(req.body).then(jane => {
       res.status(200)
       res.json(jane)
     })
@@ -211,23 +239,24 @@ router.post('/registro',(req,res)=>{
       res.json('usuario incorrecto')
   }
 })
-router.post('/send-email', (req, res)=>{
+router.get('/send', (req, res)=>{
   let transporter = nodeMailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
         // should be replaced with real sender's account
-        user: 'maesongamer@gmail.com',
-        pass: 'm@rcelo272'
+        user: '',
+        pass: ''
     }
 });
 let mailOptions = {
     // should be replaced with real recipient's account
-    to: 'marloncasagallo@gmail.com',
+    to: '',
     subject: 'hola',
     body: 'soy shoo'
 };
+
 transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
         return console.log(error);
