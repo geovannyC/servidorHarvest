@@ -5,7 +5,7 @@ apellido VARCHAR (40) NOT NULL,
 telefono VARCHAR (40) NOT NULL,
 cedula VARCHAR(15) NOT NULL UNIQUE,
 correo VARCHAR (100) NOT NULL UNIQUE,
-contra VARCHAR (25) NOT NULL,
+contra TEXT,
 estado VARCHAR (25) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS public.platillos(

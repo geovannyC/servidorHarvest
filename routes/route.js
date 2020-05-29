@@ -2,8 +2,9 @@ const express = require('express'),
   nodeMailer = require('nodemailer'),
   bodyParser = require('body-parser');
 const router = express.Router();
+const bcrypt = require('bcrypt')
 const tablas = require('../db/request')
-
+const jwt = require('jsonwebtoken')
 router.post('/contenido',(req,res)=>{
   tablas.Publicaciones.create({
     idusuario: req.body.idusuario,
@@ -56,24 +57,36 @@ router.post('/contenido',(req,res)=>{
 })
 })
 router.get("/ventas/:id", (req, res)=>{
-  tablas.Compras.findAll({
-    where: {
-      idvendedor: req.params.id
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+      tablas.Compras.findAll({
+        where: {
+          idvendedor: req.params.id
+        }
+      }).then(libro => {
+          JSON.stringify(libro)===JSON.stringify([])?res.json('No tienes publicaciones ACTIVAS'):res.json(libro);
+         
+        });
     }
-  }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json('No tienes publicaciones ACTIVAS'):res.json(libro);
-     
-    });
+  })
 })
 router.get("/compras/:id", (req, res)=>{
-  tablas.Compras.findAll({
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+      tablas.Compras.findAll({
     where: {
       idusuario: req.params.id
     }
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json('No haz realizado ninguna compra'):res.json(libro);
       
-    });
+    });  
+    }})
+
 })
 router.get("/publicaciones", (req, res)=>{
   tablas.Publicaciones.findAll().then(libro => {
@@ -81,29 +94,51 @@ router.get("/publicaciones", (req, res)=>{
      
     });
 })
-router.get("/usuarios", (req, res)=>{
-  tablas.Personas.findAll().then(libro => {
+router.get("/usuarios", authToken,(req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      console.log('error')
+    }else{
+        tablas.Personas.findAll().then(libro => {
       // console.log(libro)
       JSON.stringify(libro)===JSON.stringify([])?res.json('no hay usuarios activos'):res.json(libro);
      
     });
+    }})
+
 })
 router.post('/compra',(req,res)=>{
-  tablas.Compras.create(req.body).then(jane => {
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        tablas.Compras.create(req.body).then(jane => {
       res.status(200)
       res.json(jane)
     })
+    }})
+
 })
 
 router.post('/borrarPublicacion/:id',(req,res)=>{
-  tablas.Publicaciones.destroy({
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+       tablas.Publicaciones.destroy({
       where: {
           id: req.params.id
       }
-    })
+    }) 
+    }})
+
     });
 router.get("/getPersonas/:id", (req, res)=>{
-  const id = req.params.id
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        const id = req.params.id
   tablas.Personas.findAll({
     where: {
       id: id
@@ -112,9 +147,43 @@ router.get("/getPersonas/:id", (req, res)=>{
       JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
      
     });
+    }})
+
 })
-router.get("/datausr/:id", (req, res)=>{
-  const id = req.params.id
+router.post("/datausr/", authToken ,(req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+      const id = req.body.id
+      console.log(req.headers['autorizations'])
+      tablas.Publicaciones.findAll({
+        where: {
+          idusuario: id
+        }
+      }).then(libro => {
+          JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+         
+        });
+    }
+  })
+
+})
+function authToken(req,res,next){
+  const bearerheader = req.headers['autorizations']
+  if (typeof bearerheader !== 'undefined'){
+    req.token = bearerheader
+    next()
+  }else{
+    res.sendStatus(403)
+  }
+}
+router.get("/publicacionesusuario/:id", authToken ,(req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        const id = req.params.id
   tablas.Publicaciones.findAll({
     where: {
       idusuario: id
@@ -123,20 +192,16 @@ router.get("/datausr/:id", (req, res)=>{
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
      
     });
+    }})
+
 })
-router.get("/publicacionesusuario/:id", (req, res)=>{
-  const id = req.params.id
-  tablas.Publicaciones.findAll({
-    where: {
-      idusuario: id
-    }
-  }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
-     
-    });
-})
+
 router.get("/dataPublicacion/:id", (req, res)=>{
-  const id = req.params.id
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        const id = req.params.id
   tablas.Personas.findAll({
     where: {
       id: id
@@ -145,28 +210,50 @@ router.get("/dataPublicacion/:id", (req, res)=>{
       res.json(libro);
      
     });
+    }})
+
 })
 router.get("/publicacion/:id", (req, res)=>{
-  const id = req.params.id
-  tablas.Publicaciones.findAll({
-      where:{
-      idimagen: id
-      }
-  }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
-      
-    });
+  jwt.verify(req.token, 'my_secret_token', (err, data)=>{
+    if(err){
+      res.sendStatus(403)
+    }else{
+      const id = req.params.id
+      tablas.Publicaciones.findAll({
+          where:{
+          idimagen: id
+          }
+      }).then(libro => {
+          JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
+          
+        });
+    }
+  })
 })
-router.get("/login/:correo/:contra", (req, res)=>{ 
-  const correo = req.params.correo
-  const contra = req.params.contra
-  tablas.Personas.findAll({
+router.post("/login", (req, res)=>{ 
+  
+  tablas.Personas.findOne({
       where:{
-      correo: correo,
-      contra: contra
+      correo: req.body.correo,
       }
   }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
+    if(!libro){
+      res.json('usuario incorrecto');
+    }else{
+      bcrypt.compare(req.body.contra, libro.contra, (err, result)=>{
+        if(result === true){
+          const token = jwt.sign(req.body.correo, 'my_secret_token')
+          const data = {
+            datos: libro,
+            token: token
+          }
+          console.log(JSON.stringify(data.datos) )
+          res.json(data)
+        }else{
+          res.json('usuario incorrecto')
+        }
+      })
+    }
     });
 })
 
@@ -185,7 +272,11 @@ router.get("/contenido/:nombre/:ciudad", (req, res)=>{
       });
 })
 router.post('/destruir/:destruirID',(req,res)=>{
-    const my = req.params.destruirID;
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+          const my = req.params.destruirID;
     usuario.formatoUsuario.destroy({
         where: {
           id: my
@@ -193,11 +284,16 @@ router.post('/destruir/:destruirID',(req,res)=>{
       }).then(destr => {
         res.json('EXTERMINADO')
       });
+    }})
+
       
 })
 router.post('/actualizarusuario',(req,res)=>{
-
-  tablas.Personas.update(
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        tablas.Personas.update(
     {estado: req.body.estado},
     {where: {id: req.body.id}}
   ).then(()=>{
@@ -208,27 +304,36 @@ router.post('/actualizarusuario',(req,res)=>{
     {where: {idusuario: req.body.id}}).then(()=>{
 
     })
+    }})
+
     
 })
 router.post('/actualizarpublicacion',(req,res)=>{
-  console.log(req.body)
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        console.log(req.body)
   tablas.Publicaciones.update(
     {estadopublicacion: req.body.estadopublicacion},
     {where: {id: req.body.id}}).then(()=>{
       console.log('Publicacion Actualizada')
     })
+    }})
+
     
 });
 router.post('/registro',(req,res)=>{
-  try{
-    
+  const saltRounds = 10
+  bcrypt.hash(req.body.contra, saltRounds, (err, hash)=>{
+    try{
       tablas.Personas.create({
         nombre: req.body.nombre,
         apellido: req.body.apellido,
         telefono: req.body.telefono,
         cedula: req.body.cedula,
         correo: req.body.correo,
-        contra: req.body.contra,
+        contra: hash,
         estado: req.body.estado,
       }).then(libro => {
         
@@ -238,6 +343,8 @@ router.post('/registro',(req,res)=>{
     console.log('error')
       res.json('usuario incorrecto')
   }
+  })
+
 })
 router.get('/send', (req, res)=>{
   let transporter = nodeMailer.createTransport({
