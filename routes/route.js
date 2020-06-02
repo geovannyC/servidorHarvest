@@ -56,7 +56,7 @@ router.post('/contenido',(req,res)=>{
   res.json(usuario)
 })
 })
-router.get("/ventas/:id", (req, res)=>{
+router.get("/ventas/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -72,7 +72,7 @@ router.get("/ventas/:id", (req, res)=>{
     }
   })
 })
-router.get("/compras/:id", (req, res)=>{
+router.get("/compras/:id",authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -90,7 +90,13 @@ router.get("/compras/:id", (req, res)=>{
 })
 router.get("/publicaciones", (req, res)=>{
   tablas.Publicaciones.findAll().then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+      if(JSON.stringify(libro)===JSON.stringify([])){
+        res.json([])
+        res.status(200)
+      }else{
+        res.json(libro)
+      }
+     
      
     });
 })
@@ -120,7 +126,7 @@ router.post('/compra',(req,res)=>{
 
 })
 
-router.post('/borrarPublicacion/:id',(req,res)=>{
+router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -133,7 +139,7 @@ router.post('/borrarPublicacion/:id',(req,res)=>{
     }})
 
     });
-router.get("/getPersonas/:id", (req, res)=>{
+router.get("/getPersonas/:id",authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -162,7 +168,7 @@ router.post("/datausr/", authToken ,(req, res)=>{
           idusuario: id
         }
       }).then(libro => {
-          JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
+          JSON.stringify(libro)===JSON.stringify([])?res.json('No hay publicaciones'):res.json(libro);
          
         });
     }
@@ -196,7 +202,7 @@ router.get("/publicacionesusuario/:id", authToken ,(req, res)=>{
 
 })
 
-router.get("/dataPublicacion/:id", (req, res)=>{
+router.get("/dataPublicacion/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -213,7 +219,7 @@ router.get("/dataPublicacion/:id", (req, res)=>{
     }})
 
 })
-router.get("/publicacion/:id", (req, res)=>{
+router.get("/publicacion/:id",authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err, data)=>{
     if(err){
       res.sendStatus(403)
@@ -271,7 +277,7 @@ router.get("/contenido/:nombre/:ciudad", (req, res)=>{
         
       });
 })
-router.post('/destruir/:destruirID',(req,res)=>{
+router.post('/destruir/:destruirID',authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -288,7 +294,7 @@ router.post('/destruir/:destruirID',(req,res)=>{
 
       
 })
-router.post('/actualizarusuario',(req,res)=>{
+router.post('/actualizarusuario',authToken, (req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -308,7 +314,7 @@ router.post('/actualizarusuario',(req,res)=>{
 
     
 })
-router.post('/actualizarpublicacion',(req,res)=>{
+router.post('/actualizarpublicacion', authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
