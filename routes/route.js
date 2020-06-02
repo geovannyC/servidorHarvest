@@ -314,7 +314,7 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
 
     
 })
-router.post('/actualizarpublicacion', authToken,(req,res)=>{
+router.post('/estadopublicacion', authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -326,8 +326,22 @@ router.post('/actualizarpublicacion', authToken,(req,res)=>{
       console.log('Publicacion Actualizada')
     })
     }})
-
-    
+});
+router.post('/actualizarpublicacion', authToken,(req,res)=>{
+  console.log(req.body)
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+  datos=req.body.data
+  tablas.Publicaciones.update(
+    {descripcion: req.body.descripcion,
+    ciudad: req.body.ciudad,
+  precio: req.body.precio},
+    {where: {id: req.body.id}}).then(()=>{
+      res.json('Publicacion Actualizada')
+    })
+    }})
 });
 router.post('/registro',(req,res)=>{
   const saltRounds = 10
