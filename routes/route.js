@@ -24,7 +24,7 @@ router.post('/contenido',(req,res)=>{
           id: id
         }
       }).then(libro => {
-        console.log(usuario.nombreproducto, JSON.stringify(libro[0]['correo']))
+       
           JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
           let transporter = nodeMailer.createTransport({
             host: 'smtp.gmail.com',
@@ -44,7 +44,7 @@ router.post('/contenido',(req,res)=>{
         };
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                return console.log('HUBO UN ERROR');
+                return null;
             }
             // console.log('Message %s sent: %s', info.messageId, info.response);
         });
@@ -103,7 +103,7 @@ router.get("/publicaciones", (req, res)=>{
 router.get("/usuarios", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      console.log('error')
+      return err
     }else{
         tablas.Personas.findAll().then(libro => {
       // console.log(libro)
@@ -113,29 +113,36 @@ router.get("/usuarios", authToken,(req, res)=>{
     }})
 
 })
-router.post('/compra',(req,res)=>{
+router.post('/compra', authToken, (req,res)=>{
+  console.log(req.body.nombrecomprador)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      return null
+      return console.log('no hay token')
     }else{
-        tablas.Compras.create(req.body).then(jane => {
+      tablas.Compras.create(req.body).then(jane => {
       res.status(200)
-      res.json(jane)
+      res.json('compra exitosa')
+      console.log('exito')
     })
     }})
 
 })
 
 router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
+ 
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      return null
+      return console.log('no hay token')
     }else{
        tablas.Publicaciones.destroy({
       where: {
           id: req.params.id
       }
-    }) 
+    }).then((data)=>{
+      res.status(200)
+      res.json('compra exitosa')
+      console.log('exito')
+    })
     }})
 
     });
@@ -144,14 +151,13 @@ router.get("/getPersonas/:id",authToken, (req, res)=>{
     if(err){
       return null
     }else{
-        const id = req.params.id
+  const id = req.params.id
   tablas.Personas.findAll({
     where: {
       id: id
     }
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
-     
     });
     }})
 
@@ -162,7 +168,7 @@ router.post("/datausr/", authToken ,(req, res)=>{
       return null
     }else{
       const id = req.body.id
-      console.log(req.headers['autorizations'])
+  
       tablas.Publicaciones.findAll({
         where: {
           idusuario: id
@@ -253,7 +259,7 @@ router.post("/login", (req, res)=>{
             datos: libro,
             token: token
           }
-          console.log(JSON.stringify(data.datos) )
+   
           res.json(data)
         }else{
           res.json('usuario incorrecto')
@@ -319,16 +325,16 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
     if(err){
       return null
     }else{
-        console.log(req.body)
+  
   tablas.Publicaciones.update(
     {estadopublicacion: req.body.estadopublicacion},
     {where: {id: req.body.id}}).then(()=>{
-      console.log('Publicacion Actualizada')
+
     })
     }})
 });
 router.post('/actualizarpublicacion', authToken,(req,res)=>{
-  console.log(req.body)
+ 
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -360,7 +366,7 @@ router.post('/registro',(req,res)=>{
         JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
         })
   }catch{
-    console.log('error')
+  
       res.json('usuario incorrecto')
   }
   })
@@ -388,7 +394,7 @@ transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
         return console.log(error);
     }
-    // console.log('Message %s sent: %s', info.messageId, info.response);
+   
 });
 
 res.end();
