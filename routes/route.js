@@ -5,8 +5,10 @@ const router = express.Router();
 const bcrypt = require('bcrypt')
 const tablas = require('../db/request')
 const jwt = require('jsonwebtoken')
+const mongodb = require('../model/models')
+const base = require('../db/db')
 router.post('/contenido',(req,res)=>{
-  tablas.Publicaciones.create({
+  mongodb.Publication.create({
     idusuario: req.body.idusuario,
     idimagen: req.body.idimagen,
     nombreproducto: req.body.nombreproducto,
@@ -18,40 +20,42 @@ router.post('/contenido',(req,res)=>{
     estadopublicacion: req.body.estadoPublicacion
   }
     ).then(usuario => {
+
       const id = usuario.idusuario
       tablas.Personas.findAll({
         where: {
           id: id
         }
-      }).then(libro => {
+      })
+      // .then(libro => {
        
-          JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
-          let transporter = nodeMailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                // should be replaced with real sender's account
-                user: '',
-                pass: ''
-            }
-        });
-        let mailOptions = {
-            // should be replaced with real recipient's account
-            to: libro[0]['correo'],
-            subject: `Tu Publicacion ${usuario.nombreproducto} ha sido creada con éxito, espera su aprobación`,
-            body: 'Gracias por confiar en nosotros, para verificar que tu publicación cumple con las politicas de la empresa debes esperar 24h hasta su aprobación'
-        };
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                return null;
-            }
-            // console.log('Message %s sent: %s', info.messageId, info.response);
-        });
+      //     JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
+      //     let transporter = nodeMailer.createTransport({
+      //       host: 'smtp.gmail.com',
+      //       port: 465,
+      //       secure: true,
+      //       auth: {
+      //           // should be replaced with real sender's account
+      //           user: '',
+      //           pass: ''
+      //       }
+      //   });
+      //   let mailOptions = {
+      //       // should be replaced with real recipient's account
+      //       to: libro[0]['correo'],
+      //       subject: `Tu Publicacion ${usuario.nombreproducto} ha sido creada con éxito, espera su aprobación`,
+      //       body: 'Gracias por confiar en nosotros, para verificar que tu publicación cumple con las politicas de la empresa debes esperar 24h hasta su aprobación'
+      //   };
+      //   transporter.sendMail(mailOptions, (error, info) => {
+      //       if (error) {
+      //           return null;
+      //       }
+      //       // console.log('Message %s sent: %s', info.messageId, info.response);
+      //   });
         
-        res.end();
-        });
-
+        // res.end();
+        // });
+    
   res.status(200)
   res.json(usuario)
 })
@@ -61,10 +65,9 @@ router.get("/ventas/:id", authToken,(req, res)=>{
     if(err){
       return null
     }else{
-      tablas.Compras.findAll({
-        where: {
-          idvendedor: req.params.id
-        }
+
+      mongodb.Sells.find({
+          "idvendedor": req.params.id
       }).then(libro => {
           JSON.stringify(libro)===JSON.stringify([])?res.json('No tienes publicaciones ACTIVAS'):res.json(libro);
          
@@ -77,11 +80,9 @@ router.get("/compras/:id",authToken, (req, res)=>{
     if(err){
       return null
     }else{
-      tablas.Compras.findAll({
-    where: {
-      idusuario: req.params.id
-    }
-  }).then(libro => {
+      mongodb.Sells.find({
+        "idusuario": req.params.id
+      }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json('No haz realizado ninguna compra'):res.json(libro);
       
     });  
@@ -89,8 +90,9 @@ router.get("/compras/:id",authToken, (req, res)=>{
 
 })
 router.get("/publicaciones", (req, res)=>{
-  tablas.Publicaciones.findAll().then(libro => {
+  mongodb.Publication.find().then(libro => {
       if(JSON.stringify(libro)===JSON.stringify([])){
+        
         res.json([])
         res.status(200)
       }else{
@@ -100,30 +102,62 @@ router.get("/publicaciones", (req, res)=>{
      
     });
 })
-router.get("/usuarios", authToken,(req, res)=>{
+router.get("/usuarios", authToken, (req, res)=>{
+  console.log(req.headers.authorization)
+  jwt.verify(req.headers.authorization, 'my_secret_token', (err)=>{
+    if(err){
+      return err
+    }else{
+        mongodb.Persons.find().then(libro => {
+      // console.log(libro)
+      JSON.stringify(libro)===JSON.stringify([])?res.json('no hay usuarios activos'):res.json(libro);
+    });
+    }})
+})
+router.get("/notificaciones/:id",authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return err
     }else{
-        tablas.Personas.findAll().then(libro => {
-      // console.log(libro)
-      JSON.stringify(libro)===JSON.stringify([])?res.json('no hay usuarios activos'):res.json(libro);
-     
-    });
+      mongodb.Notifications.find({
+          "idusuario": req.params.id
+      }, (err, doc)=>{
+        if(err){
+          res.status(404)
+          res.json('error DB')
+        }else{
+          if(doc.length===0){
+            res.status(200)
+            res.json('no haz vendido nada')
+          }else{
+            res.status(200)
+            res.json(doc)
+          }
+        }
+      })
     }})
+  })
 
-})
 router.post('/compra', authToken, (req,res)=>{
   console.log(req.body.nombrecomprador)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      return console.log('no hay token')
+      res.status(404)
     }else{
-      tablas.Compras.create(req.body).then(jane => {
+      mongodb.Sells.create(req.body).then(jane => {
       res.status(200)
       res.json('compra exitosa')
       console.log('exito')
     })
+    mongodb.Notifications.create({
+      idusuario: req.body.idvendedor,
+      idimagen: req.body.idimagen,
+      nombreproducto: req.body.nombreproducto,
+      titulopublicacion: `Haz vendido ${req.body.nombreproducto}`,
+      estado: 'norevisado',
+    }).then(
+      console.log('notificacion almacenada')
+    )
     }})
 
 })
@@ -134,10 +168,9 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
     if(err){
       return console.log('no hay token')
     }else{
-       tablas.Publicaciones.destroy({
-      where: {
-          id: req.params.id
-      }
+       mongodb.Publication.remove({
+          "_id": req.params.id
+      
     }).then((data)=>{
       res.status(200)
       res.json('compra exitosa')
@@ -152,28 +185,24 @@ router.get("/getPersonas/:id",authToken, (req, res)=>{
       return null
     }else{
   const id = req.params.id
-  tablas.Personas.findAll({
-    where: {
-      id: id
-    }
+  mongodb.Persons.find({
+      "_id": id
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
     });
     }})
 
 })
-router.post("/datausr/", authToken ,(req, res)=>{
+router.post("/datausr", authToken ,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
     }else{
-      const id = req.body.id
-  
-      tablas.Publicaciones.findAll({
-        where: {
+      const id = req.body._id
+      mongodb.Publication.find({
           idusuario: id
-        }
       }).then(libro => {
+        console.log(libro)
           JSON.stringify(libro)===JSON.stringify([])?res.json('No hay publicaciones'):res.json(libro);
          
         });
@@ -196,34 +225,25 @@ router.get("/publicacionesusuario/:id", authToken ,(req, res)=>{
       return null
     }else{
         const id = req.params.id
-  tablas.Publicaciones.findAll({
-    where: {
+  mongodb.Publication.find({
       idusuario: id
-    }
   }).then(libro => {
       JSON.stringify(libro)===JSON.stringify([])?res.json([]):res.json(libro);
-     
     });
     }})
-
 })
-
 router.get("/dataPublicacion/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
     }else{
         const id = req.params.id
-  tablas.Personas.findAll({
-    where: {
-      id: id
-    }
+  mongodb.Persons.find({
+      "_id": id
   }).then(libro => {
       res.json(libro);
-     
     });
     }})
-
 })
 router.get("/publicacion/:id",authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err, data)=>{
@@ -231,94 +251,114 @@ router.get("/publicacion/:id",authToken, (req, res)=>{
       res.sendStatus(403)
     }else{
       const id = req.params.id
-      tablas.Publicaciones.findAll({
-          where:{
-          idimagen: id
-          }
+      mongodb.Publication.find({
+          idimagen: id  
       }).then(libro => {
           JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
-          
         });
     }
   })
 })
-router.post("/login", (req, res)=>{ 
-  
-  tablas.Personas.findOne({
-      where:{
-      correo: req.body.correo,
-      }
+router.post("/findEmail", (req, res)=>{ 
+  mongodb.Persons.find({
+      "correo": req.body.correo
   }).then(libro => {
-    if(!libro){
+    if(libro===null||libro.length===0){
+      res.json('No hay usuario')
+    }else{
+      res.json('El usuario ya existe')
+    }
+  })
+})
+router.post("/login", (req, res)=>{
+  mongodb.Persons.find({
+      "correo": req.body.correo,
+  }).then(libro => {
+    if(libro===null || libro === []){
       res.json('usuario incorrecto');
     }else{
-      bcrypt.compare(req.body.contra, libro.contra, (err, result)=>{
-        if(result === true){
-          const token = jwt.sign(req.body.correo, 'my_secret_token')
-          const data = {
-            datos: libro,
-            token: token
+      try {
+        bcrypt.compare(req.body.contra, libro[0].contra, (err, result)=>{
+          if(result === true){
+            const token = jwt.sign(req.body.correo, 'my_secret_token')
+            const data = {
+              datos: libro,
+              token: token
+            }
+            res.json(data)
+          }else{
+            res.status(404)
+            res.json('usuario incorrecto')
           }
-   
-          res.json(data)
-        }else{
-          res.json('usuario incorrecto')
-        }
-      })
+        })
+      } catch (error) {
+        res.json('usuario incorrecto')
+      }
     }
     });
 })
 
-router.get("/contenido/:nombre/:ciudad", (req, res)=>{
+router.get("/contenido/:nombre", (req, res)=>{
     const nombre = req.params.nombre
-    const ciudad = req.params.ciudad
-    tablas.Publicaciones.findAll({
-        where:{
-        nombreproducto: nombre, 
-        ciudad: ciudad
-
-        }
+    mongodb.Publication.find({
+        "nombreproducto": nombre
     }).then(libro => {
+
         JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
         
       });
 })
-router.post('/destruir/:destruirID',authToken,(req,res)=>{
-  jwt.verify(req.token, 'my_secret_token', (err)=>{
-    if(err){
-      return null
-    }else{
-          const my = req.params.destruirID;
-    usuario.formatoUsuario.destroy({
-        where: {
-          id: my
-        }
-      }).then(destr => {
-        res.json('EXTERMINADO')
-      });
-    }})
+// router.post('/destruir/:destruirID',authToken,(req,res)=>{
+//   jwt.verify(req.token, 'my_secret_token', (err)=>{
+//     if(err){
+//       return null
+//     }else{
+//           const my = req.params.destruirID;
+//     usuario.formatoUsuario.destroy({
+//         where: {
+//           id: my
+//         }
+//       }).then(destr => {
+//         res.json('EXTERMINADO')
+//       });
+//     }})
 
       
-})
+// })
 router.post('/actualizarusuario',authToken, (req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
     }else{
-        tablas.Personas.update(
-    {estado: req.body.estado},
-    {where: {id: req.body.id}}
-  ).then(()=>{
+        mongodb.Persons.updateOne(
+          {"_id": req.body._id},
+    {"estado": req.body.estado}).then(()=>{
 
   });
-  tablas.Publicaciones.update(
-    {estadousuario: req.body.estadousuario},
-    {where: {idusuario: req.body.id}}).then(()=>{
+  mongodb.Publication.updateOne(
+    {"idusuario": req.body._id},
+    {"estadousuario": req.body.estadousuario}).then(()=>{
 
     })
-    }})
-
-    
+    }})  
+})
+router.post('/actualizarnoti',authToken, (req,res)=>{
+  console.log(req.body)
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+      mongodb.Notifications.updateMany({idusuario: req.body._id}
+    ,{"$set":{"estado": 'revisado'}},{"multi": true},(err, doc)=>{
+      if(err){
+        res.status(404)
+        console.log('fallo al actualizar notificacion')
+      }else{
+        res.status(200)
+        console.log('la noti se actualizo')
+      }
+    })
+    }})  
 })
 router.post('/estadopublicacion', authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
@@ -326,9 +366,9 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
       return null
     }else{
   
-  tablas.Publicaciones.update(
-    {estadopublicacion: req.body.estadopublicacion},
-    {where: {id: req.body.id}}).then(()=>{
+  mongodb.Publication.updateOne(
+    {"id": req.body._id},
+    {estadopublicacion: req.body.estadopublicacion}).then(()=>{
 
     })
     }})
@@ -339,28 +379,39 @@ router.post('/actualizarpublicacion', authToken,(req,res)=>{
     if(err){
       return null
     }else{
-  datos=req.body.data
-  tablas.Publicaciones.update(
-    {descripcion: req.body.descripcion,
-    ciudad: req.body.ciudad,
-  precio: req.body.precio},
-    {where: {id: req.body.id}}).then(()=>{
-      res.json('Publicacion Actualizada')
-    })
+ 
+  
+  const newData={
+    "descripcion": req.body.descripcion,
+    "ciudad": req.body.ciudad,
+    "precio": req.body.precio
+  }
+  console.log(req.body)
+  mongodb.Publication.findByIdAndUpdate(
+   req.body._id,newData,(err, doc)=>{
+      if(err){
+        res.status(404)
+        res.json('error')
+      }else{
+        res.status(200)
+        res.json('compra exitosa')
+      }
+    }
+     )
     }})
 });
 router.post('/registro',(req,res)=>{
   const saltRounds = 10
   bcrypt.hash(req.body.contra, saltRounds, (err, hash)=>{
     try{
-      tablas.Personas.create({
-        nombre: req.body.nombre,
-        apellido: req.body.apellido,
-        telefono: req.body.telefono,
-        cedula: req.body.cedula,
-        correo: req.body.correo,
-        contra: hash,
-        estado: req.body.estado,
+      mongodb.Persons.insertMany({
+        "nombre": req.body.nombre,
+        "apellido": req.body.apellido,
+        "telefono": req.body.telefono,
+        "cedula": req.body.cedula,
+        "correo": req.body.correo,
+        "contra": hash,
+        "estado": req.body.estado,
       }).then(libro => {
         
         JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)

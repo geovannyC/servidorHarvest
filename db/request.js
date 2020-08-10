@@ -27,6 +27,15 @@ sequelize
   {
     timestamps: false
 })
+  const notificaciones = sequelize.define("notificaciones",{
+    idusuario: Sequelize.TEXT,
+    idimagen: Sequelize.TEXT,
+    nombreproducto: Sequelize.TEXT,
+    titulopublicacion: Sequelize.TEXT,
+    estado: Sequelize.TEXT,
+  },{
+    timestamps: false
+  })
   const RolUsuario = sequelize.define("RolUsuario",{
     idPersona: Sequelize.TEXT,
     idRolUsuario: Sequelize.TEXT,
@@ -50,7 +59,6 @@ sequelize
     precio: Sequelize.TEXT,
     comprador: Sequelize.TEXT,
     correo: Sequelize.TEXT,
-   
   },
   {
     timestamps: false
@@ -168,8 +176,8 @@ sequelize
     timestamps: false
   })
 
-        
- exports.Platillos = Platillos;
+exports.notificaciones = notificaciones;      
+exports.Platillos = Platillos;
 exports.Personas = personas;
 exports.RolUsuario = RolUsuario;
 exports.Login = Login;

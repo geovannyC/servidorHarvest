@@ -15,6 +15,14 @@ precio VARCHAR (50),
 comprador VARCHAR (50),
 correo VARCHAR (50)
 );
+CREATE TABLE IF NOT EXISTS public.notificaciones(
+id serial NOT NULL,
+idUsuario INT NOT NULL,
+idimagen TEXT,
+nombreProducto Varchar(50),
+titulopublicacion varchar(20),
+estado varchar (20)
+);
 CREATE TABLE IF NOT EXISTS public.RolUsuarios(
 id serial NOT NULL,
 idPersona INT NOT NULL,
