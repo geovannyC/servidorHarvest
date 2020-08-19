@@ -3,7 +3,7 @@ const express = require('express'),
   bodyParser = require('body-parser');
 const router = express.Router();
 const bcrypt = require('bcrypt')
-const tablas = require('../db/request')
+
 const jwt = require('jsonwebtoken')
 const mongodb = require('../model/models')
 const base = require('../db/db')
@@ -22,10 +22,8 @@ router.post('/contenido',(req,res)=>{
     ).then(usuario => {
 
       const id = usuario.idusuario
-      tablas.Personas.findAll({
-        where: {
-          id: id
-        }
+      mongodb.Publication.find({
+        "_id": id
       })
       // .then(libro => {
        
@@ -103,7 +101,7 @@ router.get("/publicaciones", (req, res)=>{
     });
 })
 router.get("/usuarios", authToken, (req, res)=>{
-  console.log(req.headers.authorization)
+  
   jwt.verify(req.headers.authorization, 'my_secret_token', (err)=>{
     if(err){
       return err
@@ -139,7 +137,7 @@ router.get("/notificaciones/:id",authToken, (req, res)=>{
   })
 
 router.post('/compra', authToken, (req,res)=>{
-  console.log(req.body.nombrecomprador)
+  
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       res.status(404)
@@ -202,7 +200,7 @@ router.post("/datausr", authToken ,(req, res)=>{
       mongodb.Publication.find({
           idusuario: id
       }).then(libro => {
-        console.log(libro)
+        
           JSON.stringify(libro)===JSON.stringify([])?res.json('No hay publicaciones'):res.json(libro);
          
         });
@@ -343,7 +341,7 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
     }})  
 })
 router.post('/actualizarnoti',authToken, (req,res)=>{
-  console.log(req.body)
+  
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -386,7 +384,7 @@ router.post('/actualizarpublicacion', authToken,(req,res)=>{
     "ciudad": req.body.ciudad,
     "precio": req.body.precio
   }
-  console.log(req.body)
+  
   mongodb.Publication.findByIdAndUpdate(
    req.body._id,newData,(err, doc)=>{
       if(err){
