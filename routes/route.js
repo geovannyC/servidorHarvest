@@ -171,7 +171,7 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
       
     }).then((data)=>{
       res.status(200)
-      res.json('compra exitosa')
+      res.json('eliminado exitosamente')
       console.log('exito')
     })
     }})
