@@ -102,14 +102,23 @@ router.get("/publicaciones", (req, res)=>{
 })
 router.get("/usuarios", authToken, (req, res)=>{
   
-  jwt.verify(req.headers.authorization, 'my_secret_token', (err)=>{
+  jwt.verify(req.headers.autorizations, 'my_secret_token', (err)=>{
+
     if(err){
+     
       return err
+      
     }else{
-        mongodb.Persons.find().then(libro => {
-      // console.log(libro)
-      JSON.stringify(libro)===JSON.stringify([])?res.json('no hay usuarios activos'):res.json(libro);
-    });
+      mongodb.Persons.find().then(contenido => {
+        
+        if(contenido.length===0){
+          res.json('no hay usuarios activos')
+          res.status(404)
+        }else{
+          res.json(contenido)
+          res.status(200)
+        }
+      })
     }})
 })
 router.get("/notificaciones/:id",authToken, (req, res)=>{
@@ -329,13 +338,13 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
       return null
     }else{
         mongodb.Persons.updateOne(
-          {"_id": req.body._id},
-    {"estado": req.body.estado}).then(()=>{
+          {_id: req.body._id},
+    {estado: req.body.estado}).then(()=>{
 
   });
   mongodb.Publication.updateOne(
-    {"idusuario": req.body._id},
-    {"estadousuario": req.body.estadousuario}).then(()=>{
+    {idusuario: req.body._id},
+    {estadousuario: req.body.estado}).then(()=>{
 
     })
     }})  
@@ -365,7 +374,7 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
     }else{
   
   mongodb.Publication.updateOne(
-    {"id": req.body._id},
+    {_id: req.body._id},
     {estadopublicacion: req.body.estadopublicacion}).then(()=>{
 
     })

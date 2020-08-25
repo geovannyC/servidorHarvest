@@ -58,7 +58,7 @@ const notifications = Schema({
 {timestamps: true})
 const Publication = mongoose.model('Publication', publib),
         Sells = mongoose.model('Sells', sells),
-        Persons = mongoose.model('Persons', persons),
+        Persons = mongoose.model('persons', persons),
         Notifications = mongoose.model('Notifications', notifications)
 // Exportamos el modelo para usarlo en otros ficheros
 module.exports = {
