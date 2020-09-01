@@ -39,6 +39,7 @@ const sells = Schema({
 },
 { timestamps: true });
 const persons = Schema({
+    imagen: String,
     nombre: String,
     apellido: String,
     telefono: String,

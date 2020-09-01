@@ -407,6 +407,101 @@ router.post('/actualizarpublicacion', authToken,(req,res)=>{
      )
     }})
 });
+router.post('/actualizardatosusuario', authToken, (req, res)=>{
+  const error = {
+    res: 'error al actualizar'
+  }
+  const errorPassword = {
+    res: 'contraseña incorrecta'
+  }
+  console.log(req.body.currentPassword, req.body.newPassword)
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+      const token = jwt.sign(req.body.email, 'my_secret_token')
+      if(req.body.currentPassword&&req.body.newPassword){
+        
+        mongodb.Persons.find({
+          _id: req.body._id,
+      }).then(user => {
+          try {
+            
+            const saltRounds = 10
+            bcrypt.compare(req.body.currentPassword, user[0].contra, (err, result)=>{
+             
+              if(result === true){
+                
+                bcrypt.hash(req.body.newPassword, saltRounds, (err, hash)=>{
+                  try{
+                    const newData={
+                      telefono: req.body.contact,
+                      correo: req.body.email,
+                      imagen: req.body.image,
+                      contra: hash
+                    }
+                    const data = {
+                      user: req.body.email,
+                      token: token,
+                      res: 'actualizado',
+                    }
+                    mongodb.Persons.findByIdAndUpdate(
+                      req.body._id,newData,(err, doc)=>{
+                        if(err){
+                          res.status(404)
+                          res.json(error)
+                        }else{
+                          setTimeout(() => {
+                            res.status(200)
+                            res.json(data)
+                          }, 3000);
+                         
+                        }
+                      }
+                    )
+                }catch{
+                  
+                    res.json(errorPassword)
+                }
+                })
+              }else{
+                res.status(404)
+                res.json(errorPassword)
+              }
+            })
+          } catch {
+            
+            res.json(errorPassword)
+          }
+        });
+      }else{
+        const newData={
+          telefono: req.body.contact,
+          correo: req.body.email,
+          imagen: req.body.image,
+        }
+        mongodb.Persons.findByIdAndUpdate(
+          req.body._id,newData,(err, doc)=>{
+            if(err){
+              res.status(404)
+              res.json('error al actualizar')
+            }else{
+              const data = {
+                user: req.body.email,
+                token: token,
+                res: 'actualizado'
+              }
+              setTimeout(() => {
+                res.status(200)
+                res.json(data)
+              }, 3000);
+             
+            }
+          }
+        )
+      } 
+    }})
+})
 router.post('/registro',(req,res)=>{
   const saltRounds = 10
   bcrypt.hash(req.body.contra, saltRounds, (err, hash)=>{
