@@ -5,37 +5,33 @@ var mongoose =  require('mongoose');
 var Schema = mongoose.Schema;
 // Creamos el objeto del esquema y sus atributos
 var publib = Schema({
-    idusuario: String,
     idimagen: String,
     nombreproducto: String,
     empresa: String,
     descripcion: String,
     precio: String,
     ciudad: String,
-    estadousuario: String,
     estadopublicacion: String,
+    usuario: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'persons',
+    }
 },
 { timestamps: true });
 const sells = Schema({
-    idpublicacion: String,
-    idvendedor: String,
-    idimagen: String,
-    nombreproducto: String,
-    empresa: String,
-    descripcion: String,
-    precio: String,
-    ciudad: String,
+    publicacion: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Publication',
+    },
+    vendedor: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'persons',
+    },
     fechacompra: String,
-    nombrevendedor: String,
-    apellidovendedor: String,
-    telefonovendedor: String,
-    emailvendedor: String,
-    cedulavendedor: String,
-    idusuario: String,
-    nombrecomprador: String,
-    apellidocomprador: String,
-    correocomprador: String,
-    telefonocomprador: String,
+    comprador: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'persons'
+    }
 },
 { timestamps: true });
 const persons = Schema({
@@ -50,10 +46,14 @@ const persons = Schema({
 },
 {timestamps: true})
 const notifications = Schema({
-    idusuario: String,
-    idimagen: String,
-    nombreproducto: String,
-    titulopublicacion: String,
+    usuario: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'persons',
+    },
+    publicacion: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Publication',
+    },
     estado: String,
 },
 {timestamps: true})

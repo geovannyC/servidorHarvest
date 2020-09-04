@@ -6,108 +6,100 @@ const bcrypt = require('bcrypt')
 
 const jwt = require('jsonwebtoken')
 const mongodb = require('../model/models')
-const base = require('../db/db')
-router.post('/contenido',(req,res)=>{
-  mongodb.Publication.create({
-    idusuario: req.body.idusuario,
-    idimagen: req.body.idimagen,
-    nombreproducto: req.body.nombreproducto,
-    empresa: req.body.empresa,
-    descripcion: req.body.descripcion,
-    precio: req.body.precio,
-    ciudad: req.body.ciudad,
-    estadousuario: req.body.estadoUsuario,
-    estadopublicacion: req.body.estadoPublicacion
-  }
-    ).then(usuario => {
-
-      const id = usuario.idusuario
-      mongodb.Publication.find({
-        "_id": id
-      })
-      // .then(libro => {
-       
-      //     JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
-      //     let transporter = nodeMailer.createTransport({
-      //       host: 'smtp.gmail.com',
-      //       port: 465,
-      //       secure: true,
-      //       auth: {
-      //           // should be replaced with real sender's account
-      //           user: '',
-      //           pass: ''
-      //       }
-      //   });
-      //   let mailOptions = {
-      //       // should be replaced with real recipient's account
-      //       to: libro[0]['correo'],
-      //       subject: `Tu Publicacion ${usuario.nombreproducto} ha sido creada con éxito, espera su aprobación`,
-      //       body: 'Gracias por confiar en nosotros, para verificar que tu publicación cumple con las politicas de la empresa debes esperar 24h hasta su aprobación'
-      //   };
-      //   transporter.sendMail(mailOptions, (error, info) => {
-      //       if (error) {
-      //           return null;
-      //       }
-      //       // console.log('Message %s sent: %s', info.messageId, info.response);
-      //   });
-        
-        // res.end();
-        // });
-    
-  res.status(200)
-  res.json(usuario)
-})
-})
-router.get("/ventas/:id", authToken,(req, res)=>{
+const base = require('../db/db');
+const { mongo } = require('../db/db');
+const { Persons } = require('../model/models');
+const { json } = require('express');
+router.post('/contenido', authToken, (req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
     }else{
 
+  mongodb.Publication.create(req.body, (err, doc)=>{
+    console.log('hola', req.body)
+    if(err){
+      res.status(404)
+      res.json('fallo en el servidor')
+    }else{
+      res.status(200)
+      res.json('Tu publicacion ha sido creada con éxito')
+    }
+  })
+    }})
+})
+router.get("/ventas/:id" , authToken, (req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
       mongodb.Sells.find({
-          "idvendedor": req.params.id
-      }).then(libro => {
-          JSON.stringify(libro)===JSON.stringify([])?res.json('No tienes publicaciones ACTIVAS'):res.json(libro);
-         
-        });
+          vendedor: req.params.id
+      })
+      .populate({path: "publicacion"})
+      .populate({path: "comprador", select: "nombre apellido telefono correo"})
+      // .populate({path: "vendedor", select: "nombre apellido telefono correo cedula"})
+      .exec((err, doc)=>{
+        if(err){
+          res.json('No tienes publicaciones ACTIVAS')
+          res.status(404)
+        }else if(doc.length===0){
+          res.json('No tienes publicaciones ACTIVAS')
+          res.status(404)
+        }else{
+          res.json(doc)
+          res.status(200)
+        }
+      })
     }
   })
 })
-router.get("/compras/:id",authToken, (req, res)=>{
+router.get("/compras/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
     }else{
       mongodb.Sells.find({
-        "idusuario": req.params.id
-      }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json('No haz realizado ninguna compra'):res.json(libro);
-      
-    });  
+        comprador: req.params.id
+      })
+      .populate({path: "publicacion"})
+      .populate({path: "comprador", select: "nombre apellido telefono correo"})
+      .populate({path: "vendedor", select: "nombre apellido telefono correo cedula"})
+      .exec((err, doc)=>{
+        if(err){
+          res.status(404)
+          res.json( 'No haz realizado ninguna compra')
+        }else if(doc.length===0){
+          res.status(404)
+          res.json( 'No haz realizado ninguna compra')
+        }else{
+          res.status(200)
+          res.json(doc)
+        }
+      })
     }})
-
 })
 router.get("/publicaciones", (req, res)=>{
-  mongodb.Publication.find().then(libro => {
-      if(JSON.stringify(libro)===JSON.stringify([])){
-        
-        res.json([])
-        res.status(200)
-      }else{
-        res.json(libro)
-      }
-     
-     
-    });
-})
-router.get("/usuarios", authToken, (req, res)=>{
-  
-  jwt.verify(req.headers.autorizations, 'my_secret_token', (err)=>{
-
+  mongodb.Publication.find({})
+  .populate({path: "usuario", select: "estado"})
+  .exec((err,doc)=>{
     if(err){
-     
+      res.status(404)
+      res.json('no hay publicaciones activas')
+    }else if(doc.length===0){
+      res.status(404)
+      res.json('no hay publicaciones activas')
+    }else{
+      res.status(200)
+      res.json(doc)
+    }
+  })
+  }
+)
+router.get("/usuarios", authToken, (req, res)=>{
+  jwt.verify(req.headers.autorizations, 'my_secret_token', (err)=>{
+    if(err){
       return err
-      
     }else{
       mongodb.Persons.find().then(contenido => {
         
@@ -121,22 +113,27 @@ router.get("/usuarios", authToken, (req, res)=>{
       })
     }})
 })
-router.get("/notificaciones/:id",authToken, (req, res)=>{
+router.get("/notificaciones/:id", authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return err
     }else{
       mongodb.Notifications.find({
-          "idusuario": req.params.id
-      }, (err, doc)=>{
+          usuario: req.params.id
+      })
+      .populate({path: "usuario", select: "nombre apellido"})
+      .populate({path: "publicacion", select: "nombreproducto idimagen"})
+      .exec((err, doc )=>{
+        
         if(err){
           res.status(404)
-          res.json('error DB')
+          res.json('no haz vendido nada')
         }else{
           if(doc.length===0){
-            res.status(200)
+            res.status(404)
             res.json('no haz vendido nada')
           }else{
+            
             res.status(200)
             res.json(doc)
           }
@@ -151,16 +148,14 @@ router.post('/compra', authToken, (req,res)=>{
     if(err){
       res.status(404)
     }else{
-      mongodb.Sells.create(req.body).then(jane => {
+      mongodb.Sells.create( req.body).then(jane => {
       res.status(200)
       res.json('compra exitosa')
       console.log('exito')
     })
     mongodb.Notifications.create({
-      idusuario: req.body.idvendedor,
-      idimagen: req.body.idimagen,
-      nombreproducto: req.body.nombreproducto,
-      titulopublicacion: `Haz vendido ${req.body.nombreproducto}`,
+      usuario: req.body.vendedor,
+      publicacion: req.body.publicacion,
       estado: 'norevisado',
     }).then(
       console.log('notificacion almacenada')
@@ -176,9 +171,9 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
       return console.log('no hay token')
     }else{
        mongodb.Publication.remove({
-          "_id": req.params.id
+          _id: req.params.id
       
-    }).then((data)=>{
+    }).then(()=>{
       res.status(200)
       res.json('eliminado exitosamente')
       console.log('exito')
@@ -187,6 +182,7 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
 
     });
 router.get("/getPersonas/:id",authToken, (req, res)=>{
+  console.log(req.body)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -207,7 +203,7 @@ router.post("/datausr", authToken ,(req, res)=>{
     }else{
       const id = req.body._id
       mongodb.Publication.find({
-          idusuario: id
+          usuario: id
       }).then(libro => {
         
           JSON.stringify(libro)===JSON.stringify([])?res.json('No hay publicaciones'):res.json(libro);
@@ -337,16 +333,11 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
     if(err){
       return null
     }else{
-        mongodb.Persons.updateOne(
-          {_id: req.body._id},
+        mongodb.Persons.findByIdAndUpdate(
+          req.body._id,
     {estado: req.body.estado}).then(()=>{
 
   });
-  mongodb.Publication.updateOne(
-    {idusuario: req.body._id},
-    {estadousuario: req.body.estado}).then(()=>{
-
-    })
     }})  
 })
 router.post('/actualizarnoti',authToken, (req,res)=>{
@@ -355,7 +346,7 @@ router.post('/actualizarnoti',authToken, (req,res)=>{
     if(err){
       return null
     }else{
-      mongodb.Notifications.updateMany({idusuario: req.body._id}
+      mongodb.Notifications.updateMany({usuario: req.body._id}
     ,{"$set":{"estado": 'revisado'}},{"multi": true},(err, doc)=>{
       if(err){
         res.status(404)
