@@ -15,9 +15,8 @@ router.post('/contenido', authToken, (req,res)=>{
     if(err){
       return null
     }else{
-
   mongodb.Publication.create(req.body, (err, doc)=>{
-    console.log('hola', req.body)
+    
     if(err){
       res.status(404)
       res.json('fallo en el servidor')
@@ -57,7 +56,7 @@ router.get("/ventas/:id" , authToken, (req, res)=>{
 router.get("/compras/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      return null
+      return res.status(404)
     }else{
       mongodb.Sells.find({
         comprador: req.params.id
@@ -69,6 +68,7 @@ router.get("/compras/:id", authToken,(req, res)=>{
         if(err){
           res.status(404)
           res.json( 'No haz realizado ninguna compra')
+          console.log('la publicacion ha sido eliminada')
         }else if(doc.length===0){
           res.status(404)
           res.json( 'No haz realizado ninguna compra')
@@ -79,7 +79,42 @@ router.get("/compras/:id", authToken,(req, res)=>{
       })
     }})
 })
+router.post("/raiting", authToken, (req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return err
+    }else{
+  mongodb.Publication.updateOne({
+    _id: req.body._idPub
+  },{
+    $push: {
+      calificacion: [req.body.calificacion]
+    }
+  },(err)=>{
+    if(err){
+      res.status(404)
+      res.json('error post raiting')
+    }else{
+      mongodb.Sells.findByIdAndUpdate(req.body._id,{
+        calificacion: req.body.calificacion
+      },(err)=>{
+        if(err){
+          res.status(404)
+          res.json('error post raiting')    
+        }else{
+          res.status(200)
+          res.json('calificado')
+          console.log('calificado')
+        }
+      })
+     
+    }
+  })
+}
+})
+})
 router.get("/publicaciones", (req, res)=>{
+
   mongodb.Publication.find({})
   .populate({path: "usuario", select: "estado"})
   .exec((err,doc)=>{
@@ -94,7 +129,9 @@ router.get("/publicaciones", (req, res)=>{
       res.json(doc)
     }
   })
-  }
+  
+
+}
 )
 router.get("/usuarios", authToken, (req, res)=>{
   jwt.verify(req.headers.autorizations, 'my_secret_token', (err)=>{
@@ -182,7 +219,7 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
 
     });
 router.get("/getPersonas/:id",authToken, (req, res)=>{
-  console.log(req.body)
+  
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -263,6 +300,7 @@ router.get("/publicacion/:id",authToken, (req, res)=>{
   })
 })
 router.post("/findEmail", (req, res)=>{ 
+  console.log(req.body.correo)
   mongodb.Persons.find({
       "correo": req.body.correo
   }).then(libro => {
@@ -366,8 +404,15 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
   
   mongodb.Publication.updateOne(
     {_id: req.body._id},
-    {estadopublicacion: req.body.estadopublicacion}).then(()=>{
-
+    {estadopublicacion: req.body.estadopublicacion}, (err, doc)=>{
+      if(err){
+        res.status(404)
+        res.json('error al actualizar')
+      }else{
+        res.status(200)
+        res.json('success')
+        console.log('success')
+      }
     })
     }})
 });
@@ -405,7 +450,6 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
   const errorPassword = {
     res: 'contraseña incorrecta'
   }
-  console.log(req.body.currentPassword, req.body.newPassword)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -506,7 +550,6 @@ router.post('/registro',(req,res)=>{
         "contra": hash,
         "estado": req.body.estado,
       }).then(libro => {
-        
         JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
         })
   }catch{
@@ -514,7 +557,6 @@ router.post('/registro',(req,res)=>{
       res.json('usuario incorrecto')
   }
   })
-
 })
 router.post('/sendEmail', authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{

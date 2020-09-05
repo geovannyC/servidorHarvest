@@ -12,10 +12,12 @@ var publib = Schema({
     precio: String,
     ciudad: String,
     estadopublicacion: String,
+    calificacion: Array,
     usuario: {
         type: mongoose.Schema.ObjectId,
         ref: 'persons',
-    }
+    },
+    
 },
 { timestamps: true });
 const sells = Schema({
@@ -28,6 +30,7 @@ const sells = Schema({
         ref: 'persons',
     },
     fechacompra: String,
+    calificacion: String,
     comprador: {
         type: mongoose.Schema.ObjectId,
         ref: 'persons'
