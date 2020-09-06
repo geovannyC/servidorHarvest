@@ -339,15 +339,41 @@ router.post("/login", (req, res)=>{
     });
 })
 
-router.get("/contenido/:nombre", (req, res)=>{
+router.get("/contenido/:nombre/:ciudad", (req, res)=>{
+  
     const nombre = req.params.nombre
-    mongodb.Publication.find({
-        "nombreproducto": nombre
-    }).then(libro => {
-
-        JSON.stringify(libro)===JSON.stringify([])?[]:res.json(libro)
-        
-      });
+    let data;
+    if(req.params.ciudad==='anycity'){
+      data= {
+        nombreproducto:{
+          $regex: nombre,
+          $options: "i"
+        }
+      }
+    }else{
+      data = {
+        nombreproducto: {
+          $regex: nombre,
+          $options: "i"
+        },
+        ciudad: {
+          $regex: req.params.ciudad,
+          $options: "i"
+        },
+      }
+      }
+    mongodb.Publication.find(data, (err, doc)=>{
+      if(err){
+        res.status(404)
+        res.json('no existe la publicacion')
+      }else if(doc.length===0){
+        res.status(404)
+        res.json('no existe la publicacion')
+      }else{
+        res.status(200)
+        res.json(doc)
+      }
+    })
 })
 // router.post('/destruir/:destruirID',authToken,(req,res)=>{
 //   jwt.verify(req.token, 'my_secret_token', (err)=>{
