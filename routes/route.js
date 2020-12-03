@@ -127,6 +127,7 @@ router.get("/publicaciones", (req, res)=>{
     }else{
       res.status(200)
       res.json(doc)
+      
     }
   })
   
@@ -139,7 +140,6 @@ router.get("/usuarios", authToken, (req, res)=>{
       return err
     }else{
       mongodb.Persons.find().then(contenido => {
-        
         if(contenido.length===0){
           res.json('no hay usuarios activos')
           res.status(404)
@@ -315,8 +315,16 @@ router.post("/login", (req, res)=>{
   mongodb.Persons.find({
       "correo": req.body.correo,
   }).then(libro => {
-    if(libro===null || libro === []){
-      res.json('usuario incorrecto');
+    
+    if(libro===null || libro.length === 0){
+      if(req.body.correo === 'admin' && req.body.contra === 'admin'){
+        res.json('admin no creado')
+        res.status(200)
+      }else{
+        res.status(404)
+        res.json('usuario incorrecto');
+      }
+      
     }else{
       try {
         bcrypt.compare(req.body.contra, libro[0].contra, (err, result)=>{
@@ -334,6 +342,7 @@ router.post("/login", (req, res)=>{
         })
       } catch (error) {
         res.json('usuario incorrecto')
+        res.status(404)
       }
     }
     });
@@ -579,7 +588,6 @@ router.post('/registro',(req,res)=>{
         JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
         })
   }catch{
-  
       res.json('usuario incorrecto')
   }
   })
