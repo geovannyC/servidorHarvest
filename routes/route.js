@@ -144,6 +144,7 @@ router.get("/usuarios", authToken, (req, res)=>{
           res.json('no hay usuarios activos')
           res.status(404)
         }else{
+          
           res.json(contenido)
           res.status(200)
         }
@@ -228,7 +229,7 @@ router.get("/getPersonas/:id",authToken, (req, res)=>{
   mongodb.Persons.find({
       "_id": id
   }).then(libro => {
-      JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro);
+      JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro[0]);
     });
     }})
 
@@ -314,39 +315,53 @@ router.post("/findEmail", (req, res)=>{
 router.post("/login", (req, res)=>{
   mongodb.Persons.find({
       "correo": req.body.correo,
-  }).then(libro => {
+  } )
+  .exec((err, libro) =>{
     
-    if(libro===null || libro.length === 0){
-      if(req.body.correo === 'admin' && req.body.contra === 'admin'){
-        res.json('admin no creado')
-        res.status(200)
-      }else{
-        res.status(404)
-        res.json('usuario incorrecto');
-      }
-      
-    }else{
-      try {
-        bcrypt.compare(req.body.contra, libro[0].contra, (err, result)=>{
-          if(result === true){
-            const token = jwt.sign(req.body.correo, 'my_secret_token')
-            const data = {
-              datos: libro,
-              token: token
-            }
-            res.json(data)
-          }else{
-            res.status(404)
-            res.json('usuario incorrecto')
-          }
-        })
-      } catch (error) {
+    if(err){
+      console.log("no pasa")
         res.json('usuario incorrecto')
         res.status(404)
+      }else{
+          if(libro===null || libro.length === 0){
+            if(req.body.correo === 'admin' && req.body.contra === 'admin'){
+              res.json('admin no creado')
+              res.status(200)
+            }else{
+              res.status(404)
+              res.json('usuario incorrecto');
+            }
+          }else{
+            try {
+              bcrypt.compare(req.body.contra, libro[0].contra, (err, result)=>{
+                if(result){
+                  const token = jwt.sign(req.body.correo, 'my_secret_token')
+                  let user = libro[0]
+                  // let arr = data.datos[0]["contra"].indexOf()
+                  
+                  delete user.contra
+                  let data = {
+                    datos: user,
+                    token: token
+                  }
+                  
+                  res.json(data)
+                }else{
+                  res.status(404)
+                  res.json('usuario incorrecto')
+                }
+              })
+            }catch{
+              res.status(404)
+              res.json('usuario incorrecto');
+            }
+          }
+          
       }
-    }
-    });
-})
+      
+    })
+  })
+
 
 router.get("/contenido/:nombre/:ciudad", (req, res)=>{
   
