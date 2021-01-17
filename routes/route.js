@@ -10,6 +10,16 @@ const base = require('../db/db');
 const { mongo } = require('../db/db');
 const { Persons } = require('../model/models');
 const { json } = require('express');
+let transporter = nodeMailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+      // should be replaced with real sender's account
+      user: 'maesongamer@gmail.com ',
+      pass: 'wexsmhmjxfvaiilw'
+  }
+});
 router.post('/contenido', authToken, (req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
@@ -232,6 +242,51 @@ router.get("/getPersonas/:id",authToken, (req, res)=>{
       JSON.stringify(libro)===JSON.stringify([])?res.json('Usuario inexistente'):res.json(libro[0]);
     });
     }})
+
+})
+router.get("/getById/:id", (req, res)=>{
+  const id = req.params.id
+  mongodb.Persons.find({
+      "cedula": id
+  }).then(libro => {
+    if(JSON.stringify(libro)===JSON.stringify([])){
+      res.status(200)
+      res.json('Usuario inexistente')
+    }else{
+      res.json('Usuario ya creado')
+      res.status(200)
+
+    }
+    });
+})
+router.post("/recoveryAccount", (req, res)=>{
+ console.log(req.body)
+  mongodb.Persons.find({
+      "cedula": req.body.ide
+  }).then(libro => {
+      if(JSON.stringify(libro)===JSON.stringify([])){
+        res.json('Usuario inexistente')
+        res.status(404)
+      }else{
+        // let mailOptions = {
+        //   to: libro[0].correo,
+        //   subject: `Recuperación de cuenta`,
+        //   text: `Tu contraseña provicional es ${req.body.provitionalPassword}, recuerda cambiar tu contraseña tan pronto ingreses a tu cuenta`,
+        // }
+        // transporter.sendMail(mailOptions, (error, info) => {
+        //   if (error) {
+        //       return console.log(error);
+        //   }else{
+            res.status(200)
+            res.json(libro[0].correo)
+      //     }
+         
+      // });
+        
+      }
+  
+    });
+    
 
 })
 router.post("/datausr", authToken ,(req, res)=>{
@@ -613,16 +668,6 @@ router.post('/sendEmail', authToken, (req, res)=>{
       return null
     }else{
     
-  let transporter = nodeMailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        // should be replaced with real sender's account
-        user: 'maesongamer@gmail.com ',
-        pass: 'wexsmhmjxfvaiilw'
-    }
-});
 let mailOptions = {
     to: req.body.emailvendedor,
     subject: `Felicitaciones vendiste ${req.body.nombreproducto}`,
