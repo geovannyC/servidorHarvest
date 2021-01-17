@@ -16,8 +16,8 @@ let transporter = nodeMailer.createTransport({
   secure: true,
   auth: {
       // should be replaced with real sender's account
-      user: 'maesongamer@gmail.com ',
-      pass: 'wexsmhmjxfvaiilw'
+      user: process.env.USER,
+      pass: process.env.PASS
   }
 });
 router.post('/contenido', authToken, (req,res)=>{
