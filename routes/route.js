@@ -229,6 +229,36 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
     }})
 
     });
+    
+router.post('/sendnotification',authToken,(req,res)=>{
+  const email = req.body.email
+  const content = req.body.content
+  console.log(req.body)
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    
+    if(err){
+      return console.log('no hay token')
+    }else{
+      console.log('pasa jwt')
+      //                    let mailOptions = {
+      //     to: email,
+      //     subject: `Recuperación de cuenta`,
+      //     text: `Tu publicación ha sido inhabilitada. ${content}`,
+      //   }
+      //   transporter.sendMail(mailOptions, (error, info) => {
+      //     if (error) {
+      //         return console.log(error);
+      //     }else{
+          
+      //     }
+         
+      // });
+      res.json('enviado exitosamente')
+      res.status(200)
+  }})
+
+
+    });
 router.get("/getPersonas/:id",authToken, (req, res)=>{
   
   jwt.verify(req.token, 'my_secret_token', (err)=>{
@@ -268,20 +298,42 @@ router.post("/recoveryAccount", (req, res)=>{
         res.json('Usuario inexistente')
         res.status(404)
       }else{
-        // let mailOptions = {
-        //   to: libro[0].correo,
-        //   subject: `Recuperación de cuenta`,
-        //   text: `Tu contraseña provicional es ${req.body.provitionalPassword}, recuerda cambiar tu contraseña tan pronto ingreses a tu cuenta`,
-        // }
-        // transporter.sendMail(mailOptions, (error, info) => {
-        //   if (error) {
-        //       return console.log(error);
-        //   }else{
-            res.status(200)
-            res.json(libro[0].correo)
+        const saltRounds = 10
+        bcrypt.hash(req.body.provitionalPassword, saltRounds, (err, hash)=>{
+          if(err){
+            res.json('Error en el servidor')
+            res.status(404)
+          }else{
+            mongodb.Persons.findByIdAndUpdate(
+              libro[0]._id,
+            {contra: hash},(err, result)=>{
+              console.log(result)
+              if(err){
+                res.json('Error en el servidor')
+                res.status(404)
+              }else{
+                res.status(200)
+                res.json(result.correo)
+      //                   let mailOptions = {
+      //     to: result.correo,
+      //     subject: `Recuperación de cuenta`,
+      //     text: `Tu contraseña provicional es ${req.body.provitionalPassword}, recuerda cambiar tu contraseña tan pronto ingreses a tu cuenta`,
+      //   }
+      //   transporter.sendMail(mailOptions, (error, info) => {
+      //     if (error) {
+      //         return console.log(error);
+      //     }else{
+          
       //     }
          
       // });
+              }
+            })
+          }
+        })
+   
+      
+
         
       }
   
