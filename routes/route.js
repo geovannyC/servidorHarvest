@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express'),
   nodeMailer = require('nodemailer'),
   bodyParser = require('body-parser');
+
 const router = express.Router();
 const bcrypt = require('bcrypt')
 
@@ -10,14 +12,16 @@ const base = require('../db/db');
 const { mongo } = require('../db/db');
 const { Persons } = require('../model/models');
 const { json } = require('express');
+const USER = process.env.USER
+const PASS = process.env.PASS
 let transporter = nodeMailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   auth: {
       // should be replaced with real sender's account
-      user: process.env.USER,
-      pass: process.env.PASS
+      user: USER,
+      pass: PASS
   }
 });
 router.post('/contenido', authToken, (req,res)=>{
@@ -239,20 +243,20 @@ router.post('/sendnotification',authToken,(req,res)=>{
     if(err){
       return console.log('no hay token')
     }else{
-      console.log('pasa jwt')
-      //                    let mailOptions = {
-      //     to: email,
-      //     subject: `Recuperación de cuenta`,
-      //     text: `Tu publicación ha sido inhabilitada. ${content}`,
-      //   }
-      //   transporter.sendMail(mailOptions, (error, info) => {
-      //     if (error) {
-      //         return console.log(error);
-      //     }else{
+      
+                         let mailOptions = {
+          to: email,
+          subject: `Has sido sancionado.`,
+          text: `${content}`,
+        }
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              return console.log(error);
+          }else{
           
-      //     }
+          }
          
-      // });
+      });
       res.json('enviado exitosamente')
       res.status(200)
   }})
@@ -408,14 +412,15 @@ router.get("/publicacion/:id",authToken, (req, res)=>{
   })
 })
 router.post("/findEmail", (req, res)=>{ 
-  console.log(req.body.correo)
+  
   mongodb.Persons.find({
       "correo": req.body.correo
   }).then(libro => {
     if(libro===null||libro.length===0){
-      res.json('No hay usuario')
+
+      res.status(200).send('usuario no registrado')
     }else{
-      res.json('El usuario ya existe')
+      res.status(404).send('usuario registrado')
     }
   })
 })
@@ -530,9 +535,17 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
     }else{
         mongodb.Persons.findByIdAndUpdate(
           req.body._id,
-    {estado: req.body.estado}).then(()=>{
-
-  });
+    {estado: req.body.estado}, (err, doc)=>{
+      if(err){
+        res.status(404)
+        res.json('error al actualizar')
+      }else{
+        res.status(200)
+        res.json('success')
+        console.log('success')
+      }
+    }
+    )
     }})  
 })
 router.post('/actualizarnoti',authToken, (req,res)=>{
@@ -706,11 +719,15 @@ router.post('/registro',(req,res)=>{
         "correo": req.body.correo,
         "contra": hash,
         "estado": req.body.estado,
-      }).then(libro => {
-        JSON.stringify(libro)===JSON.stringify([])?res.json('usuario incorrecto'):res.json(libro)
-        })
+      },(err)=>{
+        if(err){
+          res.status(404).send('error en el servidor')
+        }else{
+          res.status(200).send('creado exitosamente')
+        }
+      })
   }catch{
-      res.json('usuario incorrecto')
+      res.status(404)
   }
   })
 })
