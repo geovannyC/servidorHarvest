@@ -133,15 +133,12 @@ router.get("/publicaciones", (req, res)=>{
   .populate({path: "usuario", select: "estado"})
   .exec((err,doc)=>{
     if(err){
-      res.status(404)
-      res.json('no hay publicaciones activas')
+      res.status(404).send('no hay publicaciones activas')
     }else if(doc.length===0){
-      res.status(404)
-      res.json('no hay publicaciones activas')
+      res.status(404).send('no hay publicaciones activas')
     }else{
-      res.status(200)
-      res.json(doc)
-      
+     res.status(200)
+     res.json(doc)
     }
   })
   
@@ -155,12 +152,12 @@ router.get("/usuarios", authToken, (req, res)=>{
     }else{
       mongodb.Persons.find().then(contenido => {
         if(contenido.length===0){
-          res.json('no hay usuarios activos')
-          res.status(404)
+         
+          res.status(404).send('no hay usuarios activos')
         }else{
-          
-          res.json(contenido)
           res.status(200)
+          res.json(contenido)
+          
         }
       })
     }})
@@ -576,8 +573,8 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
     {_id: req.body._id},
     {estadopublicacion: req.body.estadopublicacion}, (err, doc)=>{
       if(err){
-        res.status(404)
-        res.json('error al actualizar')
+        res.status(404).send('error al actualizar')
+        
       }else{
         res.status(200)
         res.json('success')
