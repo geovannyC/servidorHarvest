@@ -248,24 +248,25 @@ router.post('/sendnotification',authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     
     if(err){
-      return console.log('no hay token')
+      res.status(404).send('error servidor')
     }else{
       
-                         let mailOptions = {
-          to: email,
-          subject: `Has sido sancionado.`,
-          text: `${content}`,
-        }
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-              return console.log(error);
-          }else{
-          
-          }
+        //                  let mailOptions = {
+        //   to: email,
+        //   subject: `Has sido sancionado.`,
+        //   text: `${content}`,
+        // }
+        // transporter.sendMail(mailOptions, (error, info) => {
+        //   if (error) {
+        //       return console.log(error);
+        //   }else{
+            
+            res.status(200)
+            res.json('enviado exitosamente')
+          // }
          
-      });
-      res.json('enviado exitosamente')
-      res.status(200)
+      // });
+     
   }})
 
 
@@ -294,13 +295,20 @@ router.get("/getById/:id", (req, res)=>{
   const id = req.params.id
   mongodb.Persons.find({
       "cedula": id
+  }, (err, doc)=>{
+    if(err || doc.length===0){
+      res.status(404).send('Usuario inexistente')
+    }else{
+      res.status(200)
+      res.json('Usuario ya creado')
+    }
   }).then(libro => {
     if(JSON.stringify(libro)===JSON.stringify([])){
-      res.status(200)
-      res.json('Usuario inexistente')
+      
+     
     }else{
-      res.json('Usuario ya creado')
-      res.status(200)
+      
+   
 
     }
     });
@@ -311,22 +319,19 @@ router.post("/recoveryAccount", (req, res)=>{
       "cedula": req.body.ide
   }).then(libro => {
       if(JSON.stringify(libro)===JSON.stringify([])){
-        res.json('Usuario inexistente')
-        res.status(404)
+        res.status(404).send(('Usuario inexistente'))
       }else{
         const saltRounds = 10
         bcrypt.hash(req.body.provitionalPassword, saltRounds, (err, hash)=>{
           if(err){
-            res.json('Error en el servidor')
-            res.status(404)
+            res.status(404).send(('Usuario inexistente'))
           }else{
             mongodb.Persons.findByIdAndUpdate(
               libro[0]._id,
             {contra: hash},(err, result)=>{
               console.log(result)
               if(err){
-                res.json('Error en el servidor')
-                res.status(404)
+                res.status(404).send(('Usuario inexistente'))
               }else{
                 res.status(200)
                 res.json(result.correo)
@@ -427,15 +432,18 @@ router.post("/findEmail", (req, res)=>{
   
   mongodb.Persons.find({
       "correo": req.body.correo
-  }).then(libro => {
-    if(libro===null||libro.length===0){
-
-      res.status(200)
-      res.json(libro)
+  },(err, doc)=>{
+    if(err || doc.length===0){
+      res.status(404).send('usuario inexistente')
+      
     }else{
-      res.status(404).send('usuario registrado')
+      
+      res.status(200)
+      res.json('usuario ya registrado')
+      
     }
-  })
+  }
+)
 })
 router.post("/login", (req, res)=>{
   mongodb.Persons.find({
