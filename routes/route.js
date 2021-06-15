@@ -32,7 +32,7 @@ router.post('/contenido', authToken, (req,res)=>{
   mongodb.Publication.create(req.body, (err, doc)=>{
     
     if(err){
-      res.status(404)
+      res.status(204)
       res.json('fallo en el servidor')
     }else{
       res.status(200)
@@ -55,10 +55,10 @@ router.get("/ventas/:id" , authToken, (req, res)=>{
       .exec((err, doc)=>{
         if(err){
           res.json('No tienes publicaciones ACTIVAS')
-          res.status(404)
+          res.status(204)
         }else if(doc.length===0){
           res.json('No tienes publicaciones ACTIVAS')
-          res.status(404)
+          res.status(204)
         }else{
           res.json(doc)
           res.status(200)
@@ -71,7 +71,7 @@ router.get("/compras/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       console.log('sin token')
-      return res.status(404).send( 'No haz realizado ninguna compra')
+      return res.status(204).send( 'No haz realizado ninguna compra')
     }else{
       mongodb.Sells.find({
         comprador: req.params.id
@@ -82,10 +82,10 @@ router.get("/compras/:id", authToken,(req, res)=>{
       .exec((err, doc)=>{
         if(err){
           
-          res.status(404).send( 'No haz realizado ninguna compra')
+          res.status(204).send( 'No haz realizado ninguna compra')
         
         }else if(doc.length===0){
-          res.status(404).send('No hay publicaciones activas')
+          res.status(204).send('No hay publicaciones activas')
          
     
         }else{
@@ -108,14 +108,14 @@ router.post("/raiting", authToken, (req, res)=>{
     }
   },(err)=>{
     if(err){
-      res.status(404)
+      res.status(204)
       res.json('error post raiting')
     }else{
       mongodb.Sells.findByIdAndUpdate(req.body._id,{
         calificacion: req.body.calificacion
       },(err)=>{
         if(err){
-          res.status(404)
+          res.status(204)
           res.json('error post raiting')    
         }else{
           res.status(200)
@@ -135,9 +135,9 @@ router.get("/publicaciones", (req, res)=>{
   .populate({path: "usuario", select: "estado"})
   .exec((err,doc)=>{
     if(err){
-      res.status(404).send('no hay publicaciones activas')
+      res.status(204).send('no hay publicaciones activas')
     }else if(doc.length===0){
-      res.status(404).send('no hay publicaciones activas')
+      res.status(204).send('no hay publicaciones activas')
     }else{
      res.status(200)
      res.json(doc)
@@ -155,7 +155,7 @@ router.get("/usuarios", authToken, (req, res)=>{
       mongodb.Persons.find().then(contenido => {
         if(contenido.length===0){
          
-          res.status(404).send('no hay usuarios activos')
+          res.status(204).send('no hay usuarios activos')
         }else{
           res.status(200)
           res.json(contenido)
@@ -177,11 +177,11 @@ router.get("/notificaciones/:id", authToken, (req, res)=>{
       .exec((err, doc )=>{
         
         if(err){
-          res.status(404)
+          res.status(204)
           res.json('no haz vendido nada')
         }else{
           if(doc.length===0){
-            res.status(404)
+            res.status(204)
             res.json('no haz vendido nada')
           }else{
             
@@ -197,11 +197,11 @@ router.post('/compra', authToken, (req,res)=>{
   
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      res.status(404).send('error servidor')
+      res.status(204).send('error servidor')
     }else{
       mongodb.Sells.create( req.body, (err, doc)=>{
         if(err){
-          res.status(404).send('error servidor')
+          res.status(204).send('error servidor')
         }else{
           mongodb.Notifications.create({
             usuario: req.body.vendedor,
@@ -209,7 +209,7 @@ router.post('/compra', authToken, (req,res)=>{
             estado: 'norevisado',
           }, (err, doc)=>{
             if(err){
-              res.status(404).send('error servidor')
+              res.status(204).send('error servidor')
             }else{
               res.status(200)
               res.json('compra exitosa')
@@ -248,7 +248,7 @@ router.post('/sendnotification',authToken,(req,res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     
     if(err){
-      res.status(404).send('error servidor')
+      res.status(204).send('error servidor')
     }else{
       
         //                  let mailOptions = {
@@ -282,7 +282,7 @@ router.get("/getPersonas/:id",authToken, (req, res)=>{
       "_id": id
   },(err, doc)=>{
     if(err){
-      res.status(404).send('Usuario inexistente')
+      res.status(204).send('Usuario inexistente')
     }else{
       res.status(200)
       res.json(doc[0])
@@ -297,7 +297,7 @@ router.get("/getById/:id", (req, res)=>{
       "cedula": id
   }, (err, doc)=>{
     if(err || doc.length===0){
-      res.status(404).send('Usuario inexistente')
+      res.status(204).send('Usuario inexistente')
     }else{
       res.status(200)
       res.json('Usuario ya creado')
@@ -319,19 +319,19 @@ router.post("/recoveryAccount", (req, res)=>{
       "cedula": req.body.ide
   }).then(libro => {
       if(JSON.stringify(libro)===JSON.stringify([])){
-        res.status(404).send(('Usuario inexistente'))
+        res.status(204).send(('Usuario inexistente'))
       }else{
         const saltRounds = 10
         bcrypt.hash(req.body.provitionalPassword, saltRounds, (err, hash)=>{
           if(err){
-            res.status(404).send(('Usuario inexistente'))
+            res.status(204).send(('Usuario inexistente'))
           }else{
             mongodb.Persons.findByIdAndUpdate(
               libro[0]._id,
             {contra: hash},(err, result)=>{
               console.log(result)
               if(err){
-                res.status(404).send(('Usuario inexistente'))
+                res.status(204).send(('Usuario inexistente'))
               }else{
                 res.status(200)
                 res.json(result.correo)
@@ -429,12 +429,12 @@ router.get("/publicacion/:id",authToken, (req, res)=>{
   })
 })
 router.post("/findEmail", (req, res)=>{ 
-  
+  console.log(req.body.correo)
   mongodb.Persons.find({
       "correo": req.body.correo
   },(err, doc)=>{
     if(err || doc.length===0){
-      res.status(404).send('usuario inexistente')
+      res.status(204).send('usuario inexistente')
       
     }else{
       
@@ -446,22 +446,26 @@ router.post("/findEmail", (req, res)=>{
 )
 })
 router.post("/login", (req, res)=>{
+
   mongodb.Persons.find({
       "correo": req.body.correo,
   } )
   .exec((err, libro) =>{
-    
-    if(err){
+    console.log(libro)
+    if(err || libro.length===0){
   
-        res.status(404).send(('usuario incorrecto'))
+        res.status(204).send(('usuario incorrecto'))
       }else{
+        if(libro[0].estado==="SuperUsuarioInhabilitado"){
+          res.status(204).send('usuario incorrecto');
+        }else{
           if(libro===null || libro.length === 0){
             if(req.body.correo === 'admin' && req.body.contra === 'admin'){
               
               res.status(200)
               res.json('admin no creado')
-            }else{
-              res.status(404).send('usuario incorrecto');
+            }else {
+              res.status(204).send('usuario incorrecto');
               
             }
           }else{
@@ -480,15 +484,17 @@ router.post("/login", (req, res)=>{
                   
                   res.json(data)
                 }else{
-                  res.status(404)
+                  res.status(204)
                   res.json('usuario incorrecto')
                 }
               })
             }catch{
-              res.status(404)
+              res.status(204)
               res.json('usuario incorrecto');
             }
           }
+        }
+
           
       }
       
@@ -496,35 +502,54 @@ router.post("/login", (req, res)=>{
   })
 
 
-router.get("/contenido/:nombre/:ciudad", (req, res)=>{
+router.post("/search", (req, res)=>{
+  const data = req.body
+    console.log(data)
+    let city = req.body.city
+    let word = req.body.word
+    let dataFilt;
+    if(city==='any'){
+      dataFilt = {nombreproducto: {$in: word}}
+    }else if(word==='any'){
+      dataFilt = {ciudad: {$in: city}}
+    }else if(city!=='any' && word!=='any'){
+      dataFilt = {nombreproducto: {$in: word}, ciudad: {$in: city}}
+    }
+    // const nombre = req.params.nombre
+    // const ciudad = req.params.ciudad
+    // console.log(nombre,ciudad)
+    // let data = {
+    //   nombreproducto: {
+    //     $all: nombre
+    //   },
+    // }
+    // if(ciudad==='anycity'){
+    //   data= {
+    //     nombreproducto:{
+    //       $regex: nombre,
+    //       $options: "i"
+    //     }
+    //   }
+    // }else{
+    //   data = {
+    //     nombreproducto: {
+    //       $regex: nombre,
+    //       $options: "i"
+    //     },
+    //     ciudad: {
+    //       $regex: ciudad,
+    //       $options: "i"
+    //     },
+    //   }
+    //   }
+    mongodb.Publication.find(dataFilt, (err, doc)=>{  
   
-    const nombre = req.params.nombre
-    let data;
-    if(req.params.ciudad==='anycity'){
-      data= {
-        nombreproducto:{
-          $regex: nombre,
-          $options: "i"
-        }
-      }
-    }else{
-      data = {
-        nombreproducto: {
-          $regex: nombre,
-          $options: "i"
-        },
-        ciudad: {
-          $regex: req.params.ciudad,
-          $options: "i"
-        },
-      }
-      }
-    mongodb.Publication.find(data, (err, doc)=>{
+
       if(err){
-        res.status(404)
+        res.status(204)
         res.json('no existe la publicacion')
       }else if(doc.length===0){
-        res.status(404)
+        res.status(204)
         res.json('no existe la publicacion')
       }else{
         res.status(200)
@@ -558,7 +583,7 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
           req.body._id,
     {estado: req.body.estado}, (err, doc)=>{
       if(err){
-        res.status(404).send('error al actualizar')
+        res.status(204).send('error al actualizar')
         res.json
       }else{
         res.status(200)
@@ -578,7 +603,7 @@ router.post('/actualizarnoti',authToken, (req,res)=>{
       mongodb.Notifications.updateMany({usuario: req.body._id}
     ,{"$set":{"estado": 'revisado'}},{"multi": true},(err, doc)=>{
       if(err){
-        res.status(404)
+        res.status(204)
         console.log('fallo al actualizar notificacion')
       }else{
         res.status(200)
@@ -598,7 +623,7 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
     {_id: req.body._id},
     {estadopublicacion: req.body.estadopublicacion}, (err, doc)=>{
       if(err){
-        res.status(404).send('error al actualizar')
+        res.status(204).send('error al actualizar')
         
       }else{
         res.status(200)
@@ -625,7 +650,7 @@ router.post('/actualizarpublicacion', authToken,(req,res)=>{
   mongodb.Publication.findByIdAndUpdate(
    req.body._id,newData,(err, doc)=>{
       if(err){
-        res.status(404)
+        res.status(204)
         res.json('error')
       }else{
         res.status(200)
@@ -675,7 +700,7 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
                     mongodb.Persons.findByIdAndUpdate(
                       req.body._id,newData,(err, doc)=>{
                         if(err){
-                          res.status(404)
+                          res.status(204)
                           res.json(error)
                         }else{
                           setTimeout(() => {
@@ -692,7 +717,7 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
                 }
                 })
               }else{
-                res.status(404)
+                res.status(204)
                 res.json(errorPassword)
               }
             })
@@ -710,7 +735,7 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
         mongodb.Persons.findByIdAndUpdate(
           req.body._id,newData,(err, doc)=>{
             if(err){
-              res.status(404)
+              res.status(204)
               res.json('error al actualizar')
             }else{
               const data = {
@@ -731,32 +756,41 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
 })
 router.post('/registro',(req,res)=>{
   const saltRounds = 10
-  bcrypt.hash(req.body.contra, saltRounds, (err, hash)=>{
-    try{
-      mongodb.Persons.insertMany({
-        "nombre": req.body.nombre,
-        "apellido": req.body.apellido,
-        "telefono": req.body.telefono,
-        "cedula": req.body.cedula,
-        "correo": req.body.correo,
-        "contra": hash,
-        "estado": req.body.estado,
-      },(err)=>{
-        if(err){
-          res.status(404).send('error en el servidor')
-        }else{
-          res.status(200).send('creado exitosamente')
-        }
+  mongodb.Persons.find({"correo": req.body.correo}, (err, data) =>{
+    console.log(data)
+    if(err || data.length===0){
+      bcrypt.hash(req.body.contra, saltRounds, (err, hash)=>{
+        try{
+          mongodb.Persons.insertMany({
+            "nombre": req.body.nombre,
+            "apellido": req.body.apellido,
+            "telefono": req.body.telefono,
+            "cedula": req.body.cedula,
+            "correo": req.body.correo,
+            "contra": hash,
+            "estado": req.body.estado,
+          },(err)=>{
+            if(err){
+              res.status(204).send('error en el servidor')
+            }else{
+              res.status(200)
+              res.json('creado exitosamente')
+            }
+          })
+      }catch{
+          res.status(204)
+      }
       })
-  }catch{
-      res.status(404)
-  }
+    }else{
+      res.status(204).send('error en el servidor')
+    }
   })
+
 })
 router.post('/sendEmail', authToken, (req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      res.status(404).send('error servidor')
+      res.status(204).send('error servidor')
     }else{
       res.status(200)
       res.json('email enviado')
@@ -769,7 +803,7 @@ router.post('/sendEmail', authToken, (req, res)=>{
 
 // transporter.sendMail(mailOptions, (error, info) => {
 //   if(err){
-//     res.status(404).send('error servidor')
+//     res.status(204).send('error servidor')
 //   }else{
 //     res.status(200)
 //     res.json('mensaje enviado')
