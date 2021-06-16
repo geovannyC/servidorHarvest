@@ -177,12 +177,10 @@ router.get("/notificaciones/:id", authToken, (req, res)=>{
       .exec((err, doc )=>{
         
         if(err){
-          res.status(204)
-          res.json('no haz vendido nada')
+          res.status(204).send('no haz vendido nada')
         }else{
           if(doc.length===0){
-            res.status(204)
-            res.json('no haz vendido nada')
+            res.status(204).send('no haz vendido nada')
           }else{
             
             res.status(200)
@@ -603,11 +601,11 @@ router.post('/actualizarnoti',authToken, (req,res)=>{
       mongodb.Notifications.updateMany({usuario: req.body._id}
     ,{"$set":{"estado": 'revisado'}},{"multi": true},(err, doc)=>{
       if(err){
-        res.status(204)
+        res.status(204).send('error al actualizar')
         console.log('fallo al actualizar notificacion')
       }else{
         res.status(200)
-        console.log('la noti se actualizo')
+        res.json('success')
       }
     })
     }})  
