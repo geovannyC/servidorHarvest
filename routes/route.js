@@ -70,8 +70,7 @@ router.get("/ventas/:id" , authToken, (req, res)=>{
 router.get("/compras/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      console.log('sin token')
-      return res.status(204).send( 'No haz realizado ninguna compra')
+      res.status(204).send( 'No haz realizado ninguna compra')
     }else{
       mongodb.Sells.find({
         comprador: req.params.id
@@ -120,7 +119,6 @@ router.post("/raiting", authToken, (req, res)=>{
         }else{
           res.status(200)
           res.json('calificado')
-          console.log('calificado')
         }
       })
      
@@ -211,7 +209,6 @@ router.post('/compra', authToken, (req,res)=>{
             }else{
               res.status(200)
               res.json('compra exitosa')
-              console.log('error servidor')
             }
           })
         }
@@ -225,7 +222,7 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
  
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
-      return console.log('no hay token')
+      res.status(204).send('error servidor')
     }else{
        mongodb.Publication.remove({
           _id: req.params.id
@@ -233,7 +230,6 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
     }).then(()=>{
       res.status(200)
       res.json('eliminado exitosamente')
-      console.log('exito')
     })
     }})
 
@@ -242,7 +238,6 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
 router.post('/sendnotification',authToken,(req,res)=>{
   const email = req.body.email
   const content = req.body.content
-  console.log(req.body)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     
     if(err){
@@ -312,7 +307,6 @@ router.get("/getById/:id", (req, res)=>{
     });
 })
 router.post("/recoveryAccount", (req, res)=>{
- console.log(req.body)
   mongodb.Persons.find({
       "cedula": req.body.ide
   }).then(libro => {
@@ -327,7 +321,6 @@ router.post("/recoveryAccount", (req, res)=>{
             mongodb.Persons.findByIdAndUpdate(
               libro[0]._id,
             {contra: hash},(err, result)=>{
-              console.log(result)
               if(err){
                 res.status(204).send(('Usuario inexistente'))
               }else{
@@ -361,6 +354,7 @@ router.post("/recoveryAccount", (req, res)=>{
 
 })
 router.post("/datausr", authToken ,(req, res)=>{
+  console.log(req.body._id)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
@@ -368,11 +362,15 @@ router.post("/datausr", authToken ,(req, res)=>{
       const id = req.body._id
       mongodb.Publication.find({
           usuario: id
-      }).then(libro => {
-        
-          JSON.stringify(libro)===JSON.stringify([])?res.json('No hay publicaciones'):res.json(libro);
-         
-        });
+      },(err, content)=>{
+        console.log(content.length)
+        if(err || content.length===0){
+          res.status(204).send('Sin Publicaciones')
+        }else{
+          res.status(200)
+          res.json(content)
+        }
+      })
     }
   })
 
@@ -427,7 +425,6 @@ router.get("/publicacion/:id",authToken, (req, res)=>{
   })
 })
 router.post("/findEmail", (req, res)=>{ 
-  console.log(req.body.correo)
   mongodb.Persons.find({
       "correo": req.body.correo
   },(err, doc)=>{
@@ -449,7 +446,6 @@ router.post("/login", (req, res)=>{
       "correo": req.body.correo,
   } )
   .exec((err, libro) =>{
-    console.log(libro)
     if(err || libro.length===0){
   
         res.status(204).send(('usuario incorrecto'))
@@ -502,7 +498,6 @@ router.post("/login", (req, res)=>{
 
 router.post("/search", (req, res)=>{
   const data = req.body
-    console.log(data)
     let city = req.body.city
     let word = req.body.word
     let dataFilt;
@@ -602,7 +597,6 @@ router.post('/actualizarnoti',authToken, (req,res)=>{
     ,{"$set":{"estado": 'revisado'}},{"multi": true},(err, doc)=>{
       if(err){
         res.status(204).send('error al actualizar')
-        console.log('fallo al actualizar notificacion')
       }else{
         res.status(200)
         res.json('success')
@@ -626,7 +620,6 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
       }else{
         res.status(200)
         res.json('success')
-        console.log('success')
       }
     })
     }})
@@ -755,7 +748,6 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
 router.post('/registro',(req,res)=>{
   const saltRounds = 10
   mongodb.Persons.find({"correo": req.body.correo}, (err, data) =>{
-    console.log(data)
     if(err || data.length===0){
       bcrypt.hash(req.body.contra, saltRounds, (err, hash)=>{
         try{
