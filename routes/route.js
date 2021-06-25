@@ -79,8 +79,9 @@ router.get("/compras/:id", authToken,(req, res)=>{
       .populate({path: "comprador", select: "nombre apellido telefono correo"})
       .populate({path: "vendedor", select: "nombre apellido telefono correo cedula"})
       .exec((err, doc)=>{
+      
         if(err){
-          
+     
           res.status(204).send( 'No haz realizado ninguna compra')
         
         }else if(doc.length===0){
@@ -90,6 +91,7 @@ router.get("/compras/:id", authToken,(req, res)=>{
         }else{
           res.status(200)
           res.json(doc)
+         
         }
       })
     }})
@@ -234,7 +236,21 @@ router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
     }})
 
     });
-    
+router.post('/deleteNotificacion', authToken, (req, res)=>{
+  console.log(req.body)
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      res.status(204).send('error servidor')
+    }else{
+       mongodb.Notifications.remove({
+          _id: req.body.id
+      
+    }).then(()=>{
+      res.status(200)
+      res.json('eliminado exitosamente')
+    })
+    }})
+})
 router.post('/sendnotification',authToken,(req,res)=>{
   const email = req.body.email
   const content = req.body.content
@@ -326,19 +342,19 @@ router.post("/recoveryAccount", (req, res)=>{
               }else{
                 res.status(200)
                 res.json(result.correo)
-      //                   let mailOptions = {
-      //     to: result.correo,
-      //     subject: `Recuperación de cuenta`,
-      //     text: `Tu contraseña provicional es ${req.body.provitionalPassword}, recuerda cambiar tu contraseña tan pronto ingreses a tu cuenta`,
-      //   }
-      //   transporter.sendMail(mailOptions, (error, info) => {
-      //     if (error) {
-      //         return console.log(error);
-      //     }else{
+            let mailOptions = {
+                to: result.correo,
+                subject: `Recuperación de cuenta`,
+                text: `Tu contraseña provicional es ${req.body.provitionalPassword} recuerda cambiar tu contraseña tan pronto ingreses a tu cuenta`,
+        }
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              return console.log(error);
+          }else{
           
-      //     }
+          }
          
-      // });
+      });
               }
             })
           }
