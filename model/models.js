@@ -17,7 +17,7 @@ var publib = Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'persons',
     },
-    
+  
 },
 { timestamps: true });
 const sells = Schema({
@@ -34,7 +34,9 @@ const sells = Schema({
     comprador: {
         type: mongoose.Schema.ObjectId,
         ref: 'persons'
-    }
+    },
+    reportecliente:  String,
+    reporteempresa:  String,
 },
 { timestamps: true });
 const persons = Schema({

@@ -67,6 +67,30 @@ router.get("/ventas/:id" , authToken, (req, res)=>{
     }
   })
 })
+router.get("/listaventas" , authToken, (req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+      mongodb.Sells.find()
+      .populate({path: "publicacion"})
+      .populate({path: "comprador", select: "nombre apellido telefono correo cedula estado"})
+      .populate({path: "vendedor", select: "nombre apellido telefono correo cedula estado"})
+      .exec((err, doc)=>{
+        if(err){
+          res.json('Sin reportes')
+          res.status(204)
+        }else if(doc.length===0){
+          res.json('Sin reportes')
+          res.status(204)
+        }else{
+          res.json(doc)
+          res.status(200)
+        }
+      })
+    }
+  })
+})
 router.get("/compras/:id", authToken,(req, res)=>{
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
@@ -85,10 +109,11 @@ router.get("/compras/:id", authToken,(req, res)=>{
           res.status(204).send( 'No haz realizado ninguna compra')
         
         }else if(doc.length===0){
-          res.status(204).send('No hay publicaciones activas')
+          res.status(204).send('No haz realizado ninguna compra')
          
     
         }else{
+         
           res.status(200)
           res.json(doc)
          
@@ -124,6 +149,50 @@ router.post("/raiting", authToken, (req, res)=>{
         }
       })
      
+    }
+  })
+}
+})
+})
+router.post("/reportPublication", authToken, (req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return err
+    }else{
+      console.log(req.body)
+  mongodb.Sells.findByIdAndUpdate(
+    req.body._id
+  ,{
+    reporteempresa: req.body.reporteempresa
+  },(err)=>{
+    if(err){
+      res.status(204)
+      res.json('error post raiting')
+    }else{
+      res.status(200)
+      res.json('Reporte Enviado')
+    }
+  })
+}
+})
+})
+router.post("/reportClient", authToken, (req, res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return err
+    }else{
+      console.log(req.body)
+  mongodb.Sells.findByIdAndUpdate(
+    req.body._id
+  ,{
+    reportecliente: req.body.reportecliente
+  },(err)=>{
+    if(err){
+      res.status(204)
+      res.json('error post raiting')
+    }else{
+      res.status(200)
+      res.json('Reporte Enviado')
     }
   })
 }
@@ -220,14 +289,14 @@ router.post('/compra', authToken, (req,res)=>{
 
 })
 
-router.post('/borrarPublicacion/:id',authToken,(req,res)=>{
- 
+router.post('/borrarPublicacion',authToken,(req,res)=>{
+  console.log(req.body)
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       res.status(204).send('error servidor')
     }else{
        mongodb.Publication.remove({
-          _id: req.params.id
+          _id: req.body.id
       
     }).then(()=>{
       res.status(200)
@@ -254,27 +323,28 @@ router.post('/deleteNotificacion', authToken, (req, res)=>{
 router.post('/sendnotification',authToken,(req,res)=>{
   const email = req.body.email
   const content = req.body.content
+  
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     
     if(err){
       res.status(204).send('error servidor')
     }else{
       
-        //                  let mailOptions = {
-        //   to: email,
-        //   subject: `Has sido sancionado.`,
-        //   text: `${content}`,
-        // }
-        // transporter.sendMail(mailOptions, (error, info) => {
-        //   if (error) {
-        //       return console.log(error);
-        //   }else{
+                         let mailOptions = {
+          to: email,
+          subject: `Has sido sancionado.`,
+          text: `${content}`,
+        }
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              return console.log(error);
+          }else{
             
             res.status(200)
             res.json('enviado exitosamente')
-          // }
+          }
          
-      // });
+      });
      
   }})
 
@@ -457,28 +527,22 @@ router.post("/findEmail", (req, res)=>{
 )
 })
 router.post("/login", (req, res)=>{
-
+ 
   mongodb.Persons.find({
       "correo": req.body.correo,
   } )
   .exec((err, libro) =>{
-    if(err || libro.length===0){
-  
-        res.status(204).send(('usuario incorrecto'))
+    if(libro===null || libro.length === 0){
+      if(req.body.correo === 'admin' && req.body.contra === 'Marcelo272'){
+        res.status(200)
+        res.json('admin no creado')
+      }else {
+        res.status(204).send('usuario incorrecto');
+      }
       }else{
         if(libro[0].estado==="SuperUsuarioInhabilitado"){
           res.status(204).send('usuario incorrecto');
         }else{
-          if(libro===null || libro.length === 0){
-            if(req.body.correo === 'admin' && req.body.contra === 'admin'){
-              
-              res.status(200)
-              res.json('admin no creado')
-            }else {
-              res.status(204).send('usuario incorrecto');
-              
-            }
-          }else{
             try {
               bcrypt.compare(req.body.contra, libro[0].contra, (err, result)=>{
                 if(result){
@@ -506,10 +570,9 @@ router.post("/login", (req, res)=>{
         }
 
           
-      }
+      })
       
     })
-  })
 
 
 router.post("/search", (req, res)=>{
@@ -641,21 +704,12 @@ router.post('/estadopublicacion', authToken,(req,res)=>{
     }})
 });
 router.post('/actualizarpublicacion', authToken,(req,res)=>{
- 
   jwt.verify(req.token, 'my_secret_token', (err)=>{
     if(err){
       return null
     }else{
- 
-  
-  const newData={
-    "descripcion": req.body.descripcion,
-    "ciudad": req.body.ciudad,
-    "precio": req.body.precio
-  }
-  
   mongodb.Publication.findByIdAndUpdate(
-   req.body._id,newData,(err, doc)=>{
+   req.body._id,req.body,(err, doc)=>{
       if(err){
         res.status(204)
         res.json('error')
@@ -686,7 +740,7 @@ router.post('/actualizardatosusuario', authToken, (req, res)=>{
       }).then(user => {
           try {
             
-            const saltRounds = 10
+            const saltRounds = 20
             bcrypt.compare(req.body.currentPassword, user[0].contra, (err, result)=>{
              
               if(result === true){
@@ -801,21 +855,21 @@ router.post('/sendEmail', authToken, (req, res)=>{
       res.status(200)
       res.json('email enviado')
     
-// let mailOptions = {
-//     to: req.body.emailvendedor,
-//     subject: `Felicitaciones vendiste ${req.body.nombreproducto}`,
-//     text: 'Enviado desde Market Software',
-// };
+let mailOptions = {
+    to: req.body.emailvendedor,
+    subject: `Felicitaciones vendiste ${req.body.nombreproducto}`,
+    text: 'Enviado desde Market Software',
+};
 
-// transporter.sendMail(mailOptions, (error, info) => {
-//   if(err){
-//     res.status(204).send('error servidor')
-//   }else{
-//     res.status(200)
-//     res.json('mensaje enviado')
-//     console.log('error servidor')
-//   }
-// });
+transporter.sendMail(mailOptions, (error, info) => {
+  if(err){
+    res.status(204).send('error servidor')
+  }else{
+    res.status(200)
+    res.json('mensaje enviado')
+    console.log('error servidor')
+  }
+});
     }});
 
 res.end();
