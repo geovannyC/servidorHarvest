@@ -666,6 +666,26 @@ router.post('/actualizarusuario',authToken, (req,res)=>{
     )
     }})  
 })
+router.post('/eliminareporte',authToken, (req,res)=>{
+  jwt.verify(req.token, 'my_secret_token', (err)=>{
+    if(err){
+      return null
+    }else{
+        mongodb.Sells.findByIdAndUpdate(
+          req.body._id, {reportecliente: req.body.reportecliente, reporteempresa:req.body.reporteempresa},
+           (err, doc)=>{
+      if(err){
+        res.status(204).send('error al actualizar')
+        res.json
+      }else{
+        res.status(200)
+        res.json('success')
+        
+      }
+    }
+    )
+    }})  
+})
 router.post('/actualizarnoti',authToken, (req,res)=>{
   
   jwt.verify(req.token, 'my_secret_token', (err)=>{
