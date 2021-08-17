@@ -1,20 +1,18 @@
-const express = require('express');
-const app = express(),
-bodyParser = require('body-parser');
-const path = require('path');
-var cors = require('cors');
-const morgan = require('morgan');
-const productsRoutes = require('../routes/route');
-const exhand = require('express-handlebars')
+
+const express = require('express'),
+ app = express(),
+ path = require('path'),
+ cors = require('cors'),
+ morgan = require('morgan'),
+ productsRoutes = require('../routes/route'),
+ exhand = require('express-handlebars');
 app.use(express.static('src'));
 app.engine('.hbs', exhand({
     defaultLayout: 'main',
     layoutsDir: path.join
 }))
-app.use(bodyParser.json({limit: '2mb', extended: true}))
-app.use(bodyParser.urlencoded({limit: '2mb', extended: true}))
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+app.use(express.json({limit: '2mb', extended: true}))
+app.use(express.urlencoded({limit: '2mb', extended: true}))
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true

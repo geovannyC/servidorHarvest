@@ -3,8 +3,6 @@ const sequelize = new Sequelize('harvest', 'postgres', 'marcelo272',
   {
     host: 'localhost',
     dialect: 'postgres',
-    
-    
   });
 sequelize
   .authenticate()
